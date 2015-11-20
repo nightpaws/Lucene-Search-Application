@@ -1,17 +1,17 @@
-# Lucene-Search-Application
-=========
+Lucene-Search-Application
+===================
 CS412 Group 14 
 
-###Description##
+####Description##
 A search engine based on Lucene 5.3.1. (JAR Files used are included for development purposes)
 
-###Authors###
+####Authors
+- Richard Meddicks ()
+- Craig Morrison (hwb12179@uni.strath.ac.uk)
+- Jordan Melville ()
+- Michael McMillan ()
+- James Minney ()
 
-Richard Meddicks	-
-Craig Morrison		- hwb12179@uni.strath.ac.uk
-James Minney		-
-Jordan Melville		-
-Michael McMillan	-
 ###License###
 Copyright 2015 
 
