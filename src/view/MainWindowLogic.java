@@ -19,10 +19,14 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	@FXML
 	private TextField txtSearchTerm;
 	
+	public MainWindowLogic() {
+		txtSearchTerm = new TextField();
+	}
+	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		
-		txtSearchTerm = new TextField();
+		
 		// TODO Auto-generated method stub
         btnSearch.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -30,7 +34,6 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	        public void handle(ActionEvent event) {
 	            System.out.println("That was easy, wasn't it?");
 	            System.out.println("Text: " + getSearchTerm());
-	            
 	        }
 	        
         });
