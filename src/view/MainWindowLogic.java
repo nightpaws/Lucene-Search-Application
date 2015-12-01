@@ -8,6 +8,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
 
+import controller.RunIndexController;
+import controller.SearchController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -22,42 +24,32 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	@FXML
 	private Button btnSearch;
 	@FXML
+	private Button btnInitialise;
+	@FXML
 	private TextField txtSearchTerm;
 	
 	ISearchModel model;
+	EventHandler<ActionEvent> sc;
+	EventHandler<ActionEvent> ric;
 	
-	public MainWindowLogic() {
+	
+	public MainWindowLogic() throws URISyntaxException, IOException {	
 		
-		URI indexDirectory = null;
-		try {
-			indexDirectory = new URI("/Users/James/index");
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			model = new SearchModel(indexDirectory);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		
+		model = new SearchModel();
+		// Controllers
+		sc = new SearchController<ActionEvent>(model, this);
+		ric = new RunIndexController<ActionEvent>(model);
 		txtSearchTerm = new TextField();
 	}
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		
-		
-		// TODO Auto-generated method stub
-        btnSearch.setOnAction(new EventHandler<ActionEvent>() {
-
-	        @Override
-	        public void handle(ActionEvent event) {
-	            System.out.println("That was easy, wasn't it?");
-	            System.out.println("Text: " + getSearchTerm());
-	        }
-	        
-        });
+        btnSearch.setOnAction(sc);
+        
+        btnInitialise.setOnAction(ric);
 		
 	}
 
@@ -71,7 +63,7 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	public String getSearchTerm() {
 		// TODO Auto-generated method stub
 		String text = txtSearchTerm.getText().toString();
-		System.out.println(text);
+
 		return text;
 	}
 
