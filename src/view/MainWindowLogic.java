@@ -1,5 +1,8 @@
 package view;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
@@ -11,6 +14,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import model.ISearchModel;
+import model.SearchModel;
 
 public class MainWindowLogic implements IMainWindowLogic, Observer, Initializable {
 	
@@ -19,7 +24,23 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	@FXML
 	private TextField txtSearchTerm;
 	
+	ISearchModel model;
+	
 	public MainWindowLogic() {
+		
+		URI indexDirectory = null;
+		try {
+			indexDirectory = new URI("/Users/James/index");
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			model = new SearchModel(indexDirectory);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		txtSearchTerm = new TextField();
 	}
 	
