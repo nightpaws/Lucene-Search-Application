@@ -1,5 +1,7 @@
 package model;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
@@ -72,10 +74,41 @@ public class SearchModel implements ISearchModel {
 		
 	}
 	
-	private String removeStopwords(String searchTerm) {
-		String newSearchTerm = null;
+	private void removeStopwords(String searchTerm) { // note: code adapted from http://stackoverflow.com/questions/27685839/removing-stopwords-from-a-string-in-java
+		int k=0;
+		ArrayList<String> wordsList = new ArrayList<String>();
+		String currentLine;
+		String[] stopwords = new String[175];
 		
-		return newSearchTerm;
+		//adds words from text file to array
+		try{
+		        FileReader fr=new FileReader("stopwords.txt");
+		        BufferedReader br= new BufferedReader(fr);
+		        while ((currentLine = br.readLine()) != null){
+		            stopwords[k]=currentLine;
+		            k++;
+		        }
+		        String s= searchTerm;
+		        StringBuilder builder = new StringBuilder(s);
+		        String[] words = builder.toString().split("\\s"); // words in searchterm
+		        for (String word : words){
+		            wordsList.add(word);
+		        }
+		        for(int i = 0; i < wordsList.size(); i++){
+		            for(int j = 0; j < k; j++){
+		                if(stopwords[j].contains(wordsList.get(i).toLowerCase())){
+		                    wordsList.set(i, "");
+		                    break;
+		                }
+		             }
+		        }
+		        
+		    }
+		
+		catch(Exception e){
+		        System.out.println(e);
+		    }
+		
 	}
 
 }
