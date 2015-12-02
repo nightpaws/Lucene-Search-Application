@@ -197,8 +197,66 @@ public class SearchModel implements ISearchModel {
 	}
 
 	@Override
-	public void videoSearch(String searchTerm) {
-		// TODO Auto-generated method stub
+	public void videoSearch(String searchTerm) throws IOException, ParseException {
+		/**
+		 * Currently a clone of title search
+		 */
+		String index = "test_index";
+		String field = "titleContent";
+		String queries = null;
+		int repeat = 0;
+		boolean raw = false;
+		String queryString = null;
+		int hitsPerPage = 10;
+
+		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
+		IndexSearcher searcher = new IndexSearcher(reader);
+		Analyzer analyzer = new StandardAnalyzer();
+
+		queryString = searchTerm;
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+		QueryParser parser = new QueryParser(field, analyzer);
+
+		while (true) {
+			if (queries == null && queryString == null) {                        // prompt the user
+				System.out.println("Enter query: ");
+			}
+
+			String line = queryString != null ? queryString : in.readLine();
+
+			if (line == null || line.length() == -1) {
+				break;
+			}
+
+			line = line.trim();
+			try {
+				if (line.length() == 0) {
+					break;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			Query query = parser.parse(line);
+			System.out.println("Searching for: " + query.toString(field));
+
+			if (repeat > 0) {                           // repeat & time as benchmark
+				Date start = new Date();
+				for (int i = 0; i < repeat; i++) {
+					searcher.search(query, 100);
+				}
+				Date end = new Date();
+				System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
+			}
+
+			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+
+			if (queryString != null) {
+				break;
+			}
+		}
+		reader.close();
 
 	}
 

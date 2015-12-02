@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Indexer {
@@ -172,6 +173,53 @@ public class Indexer {
 			String titleContent = fileContent.substring(fileContent.indexOf("<title>") + 7, fileContent.indexOf("</title>"));
 			System.out.println(titleContent);
 			doc.add(new TextField("titleContent", titleContent, Field.Store.NO));
+			
+			
+			/*
+			 * BEGIN <VIDEO></VIDEO> ELEMENT EXTRACTION
+			 */
+
+			String videoContent = null;
+			// Start by making this easier to work with
+
+			// try {
+			String vidSubstring = fileContent.substring(fileContent.indexOf("<video>") + 7,
+					fileContent.indexOf("</video>"));
+			// } catch (Exception e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
+
+			ArrayList<String> vidTags = new ArrayList<String>();
+			
+			// parse content between <video> elements
+			if (vidSubstring.contains("title=")) { // video has title
+				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("title="),
+						vidSubstring.indexOf("\"", vidSubstring.indexOf("title="))));
+			}
+			if (vidSubstring.contains("lang=")) {// video specifies language
+				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("lang="),
+						vidSubstring.indexOf("\"", vidSubstring.indexOf("lang="))));
+			}
+			if (vidSubstring.contains("alt=")) {// video has alternate
+												// description
+				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("alt="),
+						vidSubstring.indexOf("\"", vidSubstring.indexOf("alt="))));
+			}
+			if (vidSubstring.contains("src=")) {// video url, search for strings
+				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("src="),
+						vidSubstring.indexOf("\"", vidSubstring.indexOf("src="))));
+			}
+
+			if (videoContent != null) {
+				System.out.println("VideoContent: " + videoContent);
+				doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
+
+			}
+
+			/*
+			 * END OF <VIDEO></VIDEO> ELEMENT EXTRACTION
+			 */
 			
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
 				// New index, so we just add the document (no old document can be there):
