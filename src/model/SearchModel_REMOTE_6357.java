@@ -7,9 +7,6 @@ import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.imageio.metadata.IIOMetadataNode;
 
@@ -29,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
-import java.util.HashMap;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -45,13 +41,11 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 
 
-public class SearchModel extends Observable implements ISearchModel {
+public class SearchModel implements ISearchModel {
 
 	// A List of stopWords.
 	List<String> stopWords;
 
-	// Search Results
-	List<Map<String, String>> searchResults;
 
 	IndexReader reader; // Object for reading the index directory.
 	IndexSearcher searcher; // Searcher Object
@@ -64,8 +58,6 @@ public class SearchModel extends Observable implements ISearchModel {
 	public SearchModel() throws IOException {
 
 		index = "test_index/"; //update in indexer
-
-		searchResults = new ArrayList<Map<String, String>>();
 
 		/*stopWords = new ArrayList<String>();
 		reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
@@ -92,29 +84,19 @@ public class SearchModel extends Observable implements ISearchModel {
 	 * is executed another time and all hits are collected.
 	 * 
 	 */
-	public void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
+	public static void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
 			int hitsPerPage, boolean raw, boolean interactive) throws IOException {
 
 		// Collect enough docs to show 5 pages
 		TopDocs results = searcher.search(query, 5 * hitsPerPage);
 		ScoreDoc[] hits = results.scoreDocs;
 
-
 		int numTotalHits = results.totalHits;
 		System.out.println(numTotalHits + " total matching documents");
 
 		int start = 0;
 		int end = Math.min(numTotalHits, hitsPerPage);
-		for (int i = start; i < end; i++) {
-			Document doc = searcher.doc(hits[i].doc);
-			String path = doc.get("path");
-			if (path != null) {
-				Map<String, String> resultMap = new HashMap<String, String>();
-				resultMap.put("Path", path);
-				//resultMap.put("Modified", doc.get("modified").toString());
-				searchResults.add(resultMap);
-			}
-		}
+
 		while (true) {
 			if (end > hits.length) {
 				System.out.println("Only results 1 - " + hits.length +" of " + numTotalHits + " total matching documents collected.");
@@ -223,13 +205,8 @@ public class SearchModel extends Observable implements ISearchModel {
 	@Override
 	public void titleSearch(String searchTerm) throws IOException, ParseException {
 
-<<<<<<< HEAD
-		String index = "/Users/James/Documents/index";
-		String field = "contents";
-=======
 		String index = "test_index";
 		String field = "titleContent";
->>>>>>> 7ca1ea393fbef12c7fe253d60c2e9e78f288d9fb
 		String queries = null;
 		int repeat = 0;
 		boolean raw = false;
@@ -289,8 +266,6 @@ public class SearchModel extends Observable implements ISearchModel {
 			}
 		}
 		reader.close();
-		setChanged();
-		notifyObservers();
 	}
 
 
@@ -322,23 +297,13 @@ public class SearchModel extends Observable implements ISearchModel {
 					}
 				}
 			}
+
 		}
 
 		catch(Exception e){
 			System.out.println(e);
 		}
 
-	}
-
-	@Override
-	public List<Map<String, String>> getSearchResults() {
-
-		return searchResults;
-	}
-
-	@Override
-	public void addObservers(Observer o) {
-		super.addObserver(o);	
 	}
 
 }

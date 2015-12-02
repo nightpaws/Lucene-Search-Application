@@ -1,0 +1,20 @@
+[class^="icon-"], [class*=" icon-"] {
+	/* font-family: 'icomoon'; */
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	font-size: 2.7em;
+    line-height: 0.1em;
+    vertical-align: -0.4em;
+    color: #5d9732;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+.icon-quotes-right, .icon-quotes-left { quotes: "\201C" "\201D" "\2018" "\2019";} 
+.icon-quotes-right:before { content: close-quote; margin-left: 0.25em; }
+.icon-quotes-left:before { content: open-quote; margin-right: 0.25em; }

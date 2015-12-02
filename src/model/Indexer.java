@@ -35,8 +35,8 @@ public class Indexer {
 				+ " [-index INDEX_PATH] [-docs DOCS_PATH] [-update]\n\n"
 				+ "This indexes the documents in DOCS_PATH, creating a Lucene index"
 				+ "in INDEX_PATH that can be searched with SearchFiles";
-		String indexPath = "/Users/James/Documents/index/";
-		String docsPath = "/Users/James/Documents/CS412/test_pages/";
+		String indexPath = "test_index/"; //update in search model too
+		String docsPath = "test_pages/";
 		boolean create = true;
 
 
