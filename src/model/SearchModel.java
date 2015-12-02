@@ -57,7 +57,7 @@ public class SearchModel implements ISearchModel {
 
 	public SearchModel() throws IOException {
 
-		index = "/Users/James/index";
+		index = "test_index/"; //update in indexer
 
 		/*stopWords = new ArrayList<String>();
 		reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
@@ -205,7 +205,7 @@ public class SearchModel implements ISearchModel {
 	@Override
 	public void titleSearch(String searchTerm) throws IOException, ParseException {
 
-		String index = "/Users/James/Documents/index";
+		String index = "test_index";
 		String field = "titleContent";
 		String queries = null;
 		int repeat = 0;
