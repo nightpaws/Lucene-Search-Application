@@ -135,7 +135,16 @@ public class Indexer {
 		try (InputStream stream = Files.newInputStream(file)) {
 			// make a new, empty document
 			Document doc = new Document();
-
+			
+			// READ THE CONTENT OF THE FILE INTO A STRING
+			String fileContent = "";
+			String sCurrentLine;
+			BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+			while ((sCurrentLine = br.readLine()) != null) {
+				fileContent = fileContent + " " + sCurrentLine; 
+			}
+			br.close();
+			
 			// Add the path of the file as a field named "path".  Use a
 			// field that is indexed (i.e. searchable), but don't tokenize 
 			// the field into separate words and don't index term frequency
@@ -152,22 +161,15 @@ public class Indexer {
 			// February 17, 2011, 2-3 PM.
 			doc.add(new LongField("modified", lastModified, Field.Store.NO));
 
-			/*
+			
 			// Add the contents of the file to a field named "contents".  Specify a Reader,
 			// so that the text of the file is tokenized and indexed, but not stored.
 			// Note that FileReader expects the file to be in UTF-8 encoding.
 			// If that's not the case searching for special characters will fail.
-			doc.add(new TextField("contents", new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));
-			 */
+			doc.add(new TextField("contents", fileContent, Field.Store.NO));
+			 
 			
-			// READ THE CONTENT OF THE FILE INTO A STRING
-			String fileContent = "";
-			String sCurrentLine;
-			BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-			while ((sCurrentLine = br.readLine()) != null) {
-				fileContent = fileContent + " " + sCurrentLine; 
-			}
-			br.close();
+			
 			// EXTRACT THE STRING BETWEEN THE <TITLE> ELEMENT
 			String titleContent = fileContent.substring(fileContent.indexOf("<title>") + 7, fileContent.indexOf("</title>"));
 			System.out.println(titleContent);

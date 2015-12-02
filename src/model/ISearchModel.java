@@ -1,11 +1,14 @@
 package model;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Observer;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.xml.ParserException;
 
-public interface ISearchModel {
+public interface ISearchModel  {
 
 	// Classic 'search by content' like google does. Searches the <body> of the document.
 	public void contentSearch(String searchTerm) throws ParserException;
@@ -21,5 +24,9 @@ public interface ISearchModel {
 
 	// Initialise the model
 	public void initialise();
+	
+	public List<Map<String, String>> getSearchResults();
+	
+	public void addObservers(Observer o);
 	
 }
