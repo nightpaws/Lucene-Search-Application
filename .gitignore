@@ -105,3 +105,10 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Development Preferences
+# =====
+test_index/
+test_pages/
+test_pages_full/
+
