@@ -27,6 +27,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Indexer {
 
@@ -36,7 +38,7 @@ public class Indexer {
 				+ "This indexes the documents in DOCS_PATH, creating a Lucene index"
 				+ "in INDEX_PATH that can be searched with SearchFiles";
 		String indexPath = "test_index/"; // update in search model too
-//		String docsPath = "test_pages/";
+		// String docsPath = "test_pages/";
 		String docsPath = "test_pages_full/";
 		boolean create = true;
 
@@ -179,13 +181,13 @@ public class Indexer {
 			doc.add(new TextField("contents", fileContent, Field.Store.NO));
 
 			// EXTRACT THE STRING BETWEEN THE <TITLE> ELEMENT
-			try{
-			String titleContent = fileContent.substring(fileContent.indexOf("<title>") + 7,
-					fileContent.indexOf("</title>"));
-			System.out.println(titleContent);
-			doc.add(new TextField("titleContent", titleContent, Field.Store.NO));
-			}catch(IndexOutOfBoundsException e){
-				System.out.println("No Title Found");
+			try {
+				String titleContent = fileContent.substring(fileContent.indexOf("<title>") + 7,
+						fileContent.indexOf("</title>"));
+				System.out.println(titleContent);
+				doc.add(new TextField("titleContent", titleContent, Field.Store.NO));
+			} catch (IndexOutOfBoundsException e) {
+				System.out.println("No Title Found"); // debug line
 			}
 
 			/*
@@ -193,34 +195,41 @@ public class Indexer {
 			 */
 
 			String videoContent = null;
+			Pattern src = Pattern.compile("src=\"(.*)\"");
+			
 			// Start by making this easier to work with
 
 			try {
 				String vidSubstring = fileContent.substring(fileContent.indexOf("<video>") + 7,
 						fileContent.indexOf("</video>"));
-				System.err.println(" FOUND VIDEO");
 				ArrayList<String> vidTags = new ArrayList<String>();
 
 				// parse content between <video> elements
-				if (vidSubstring.contains("title=\"")) { // video has title
+				if (vidSubstring.contains("title=")) { // video has title
 					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("title=\""),
 							vidSubstring.indexOf("\"", vidSubstring.indexOf("title=\""))));
 				}
-				if (vidSubstring.contains("lang=\"")) {// video specifies
+				if (vidSubstring.contains("lang=")) {// video specifies
 														// language
 					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("lang=\""),
 							vidSubstring.indexOf("\"", vidSubstring.indexOf("lang=\""))));
 				}
-				if (vidSubstring.contains("alt=\"")) {// video has alternate
+				if (vidSubstring.contains("alt=")) {// video has alternate
 														// description
 					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("alt=\""),
 							vidSubstring.indexOf("\"", vidSubstring.indexOf("alt=\""))));
 				}
-				if (vidSubstring.contains("src=\"")) {// video url, search for
+				if (vidSubstring.contains("src=")) {// video url, search for
 														// strings
-					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("src=\""),
-							vidSubstring.indexOf("\"", vidSubstring.indexOf("src=\""))));
-
+//					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("src=\""),
+//							vidSubstring.indexOf("\"", vidSubstring.indexOf("src=\""))));
+				
+					//attempting to get the content from the space between src=" and "
+					Matcher m = src.matcher(vidSubstring);
+					while (m.find()) {
+					  System.err.println(m.group(1));
+					}
+					
 					// src https://url.com/folder/deconstruction/goesHere.mp4
 
 					// try and look at separating words further if possible.
@@ -236,8 +245,8 @@ public class Indexer {
 					doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
 
 				}
-			} catch (IndexOutOfBoundsException e){
-				System.out.println("File does not contain video");
+			} catch (IndexOutOfBoundsException e) {
+				System.out.println("File does not contain video"); // debug line
 			}
 			/*
 			 * END OF <VIDEO></VIDEO> ELEMENT EXTRACTION
