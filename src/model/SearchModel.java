@@ -224,7 +224,7 @@ public class SearchModel extends Observable implements ISearchModel {
 	public void titleSearch(String searchTerm) throws IOException, ParseException {
 
 
-		String index = "/Users/James/Documents/index";
+		String index = "test_index";
 		String field = "titleContent";
 
 		String queries = null;
