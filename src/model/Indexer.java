@@ -195,24 +195,30 @@ public class Indexer {
 			ArrayList<String> vidTags = new ArrayList<String>();
 			
 			// parse content between <video> elements
-			if (vidSubstring.contains("title=")) { // video has title
-				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("title="),
-						vidSubstring.indexOf("\"", vidSubstring.indexOf("title="))));
+			if (vidSubstring.contains("title=\"")) { // video has title
+				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("title=\""),
+						vidSubstring.indexOf("\"", vidSubstring.indexOf("title=\""))));
 			}
-			if (vidSubstring.contains("lang=")) {// video specifies language
-				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("lang="),
-						vidSubstring.indexOf("\"", vidSubstring.indexOf("lang="))));
+			if (vidSubstring.contains("lang=\"")) {// video specifies language
+				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("lang=\""),
+						vidSubstring.indexOf("\"", vidSubstring.indexOf("lang=\""))));
 			}
-			if (vidSubstring.contains("alt=")) {// video has alternate
+			if (vidSubstring.contains("alt=\"")) {// video has alternate
 												// description
-				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("alt="),
-						vidSubstring.indexOf("\"", vidSubstring.indexOf("alt="))));
+				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("alt=\""),
+						vidSubstring.indexOf("\"", vidSubstring.indexOf("alt=\""))));
 			}
-			if (vidSubstring.contains("src=")) {// video url, search for strings
-				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("src="),
-						vidSubstring.indexOf("\"", vidSubstring.indexOf("src="))));
+			if (vidSubstring.contains("src=\"")) {// video url, search for strings
+				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("src=\""),
+						vidSubstring.indexOf("\"", vidSubstring.indexOf("src=\""))));
+			}
+			
+			for (String s : vidTags) {
+				videoContent = videoContent+s+ " ";
 			}
 
+			
+			
 			if (videoContent != null) {
 				System.out.println("VideoContent: " + videoContent);
 				doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
