@@ -17,7 +17,7 @@ public interface ISearchModel  {
 	public void imageSearch(String searchTerm);
 	
 	// Can implement later if there's time.
-	public void videoSearch(String searchTerm);
+	public void videoSearch(String searchTerm) throws IOException, ParseException;
 	
 	// Searches Title tags.
 	public void titleSearch(String searchTerm) throws IOException, ParseException;
