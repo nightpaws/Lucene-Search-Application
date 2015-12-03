@@ -32,14 +32,13 @@ public class Indexer {
 
 	public Indexer(String docs) {
 		/** Index all text files under a directory. */
-		String usage = "java org.apache.lucene.demo.IndexFiles"
-				+ " [-index INDEX_PATH] [-docs DOCS_PATH] [-update]\n\n"
+		String usage = "java org.apache.lucene.demo.IndexFiles" + " [-index INDEX_PATH] [-docs DOCS_PATH] [-update]\n\n"
 				+ "This indexes the documents in DOCS_PATH, creating a Lucene index"
 				+ "in INDEX_PATH that can be searched with SearchFiles";
-		String indexPath = "test_index/"; //update in search model too
-		String docsPath = "test_pages/";
+		String indexPath = "test_index/"; // update in search model too
+//		String docsPath = "test_pages/";
+		String docsPath = "test_pages_full/";
 		boolean create = true;
-
 
 		if (docsPath == null) {
 			System.err.println("Usage: " + usage);
@@ -48,7 +47,8 @@ public class Indexer {
 
 		final Path docDir = Paths.get(docsPath);
 		if (!Files.isReadable(docDir)) {
-			System.out.println("Document directory '" +docDir.toAbsolutePath()+ "' does not exist or is not readable, please check the path");
+			System.out.println("Document directory '" + docDir.toAbsolutePath()
+					+ "' does not exist or is not readable, please check the path");
 			System.exit(1);
 		}
 
@@ -71,7 +71,7 @@ public class Indexer {
 
 			// Optional: for better indexing performance, if you
 			// are indexing many documents, increase the RAM
-			// buffer.  But if you do this, increase the max heap
+			// buffer. But if you do this, increase the max heap
 			// size to the JVM (eg add -Xmx512m or -Xmx1g):
 			//
 			// iwc.setRAMBufferSizeMB(256.0);
@@ -80,7 +80,7 @@ public class Indexer {
 			indexDocs(writer, docDir);
 
 			// NOTE: if you want to maximize search performance,
-			// you can optionally call forceMerge here.  This can be
+			// you can optionally call forceMerge here. This can be
 			// a terribly costly operation, so generally it's only
 			// worth it when your index is relatively static (ie
 			// you're done adding documents to it):
@@ -93,25 +93,30 @@ public class Indexer {
 			System.out.println(end.getTime() - start.getTime() + " total milliseconds");
 
 		} catch (IOException e) {
-			System.out.println(" caught a " + e.getClass() +
-					"\n with message: " + e.getMessage());
+			System.out.println(" caught a " + e.getClass() + "\n with message: " + e.getMessage());
 		}
 	}
 
 	/**
-	 * Indexes the given file using the given writer, or if a directory is given,
-	 * recurses over files and directories found under the given directory.
+	 * Indexes the given file using the given writer, or if a directory is
+	 * given, recurses over files and directories found under the given
+	 * directory.
 	 * 
-	 * NOTE: This method indexes one document per input file.  This is slow.  For good
-	 * throughput, put multiple documents into your input file(s).  An example of this is
-	 * in the benchmark module, which can create "line doc" files, one document per line,
-	 * using the
-	 * <a href="../../../../../contrib-benchmark/org/apache/lucene/benchmark/byTask/tasks/WriteLineDocTask.html"
+	 * NOTE: This method indexes one document per input file. This is slow. For
+	 * good throughput, put multiple documents into your input file(s). An
+	 * example of this is in the benchmark module, which can create "line doc"
+	 * files, one document per line, using the <a href=
+	 * "../../../../../contrib-benchmark/org/apache/lucene/benchmark/byTask/tasks/WriteLineDocTask.html"
 	 * >WriteLineDocTask</a>.
-	 *  
-	 * @param writer Writer to the index where the given file/dir info will be stored
-	 * @param path The file to index, or the directory to recurse into to find files to index
-	 * @throws IOException If there is a low-level I/O error
+	 * 
+	 * @param writer
+	 *            Writer to the index where the given file/dir info will be
+	 *            stored
+	 * @param path
+	 *            The file to index, or the directory to recurse into to find
+	 *            files to index
+	 * @throws IOException
+	 *             If there is a low-level I/O error
 	 */
 	static void indexDocs(final IndexWriter writer, Path path) throws IOException {
 		if (Files.isDirectory(path)) {
@@ -136,18 +141,18 @@ public class Indexer {
 		try (InputStream stream = Files.newInputStream(file)) {
 			// make a new, empty document
 			Document doc = new Document();
-			
+
 			// READ THE CONTENT OF THE FILE INTO A STRING
 			String fileContent = "";
 			String sCurrentLine;
 			BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
 			while ((sCurrentLine = br.readLine()) != null) {
-				fileContent = fileContent + " " + sCurrentLine; 
+				fileContent = fileContent + " " + sCurrentLine;
 			}
 			br.close();
-			
-			// Add the path of the file as a field named "path".  Use a
-			// field that is indexed (i.e. searchable), but don't tokenize 
+
+			// Add the path of the file as a field named "path". Use a
+			// field that is indexed (i.e. searchable), but don't tokenize
 			// the field into separate words and don't index term frequency
 			// or positional information:
 			Field pathField = new StringField("path", file.toString(), Field.Store.YES);
@@ -155,28 +160,34 @@ public class Indexer {
 
 			// Add the last modified date of the file a field named "modified".
 			// Use a LongField that is indexed (i.e. efficiently filterable with
-			// NumericRangeFilter).  This indexes to milli-second resolution, which
-			// is often too fine.  You could instead create a number based on
-			// year/month/day/hour/minutes/seconds, down the resolution you require.
+			// NumericRangeFilter). This indexes to milli-second resolution,
+			// which
+			// is often too fine. You could instead create a number based on
+			// year/month/day/hour/minutes/seconds, down the resolution you
+			// require.
 			// For example the long value 2011021714 would mean
 			// February 17, 2011, 2-3 PM.
 			doc.add(new LongField("modified", lastModified, Field.Store.NO));
 
-			
-			// Add the contents of the file to a field named "contents".  Specify a Reader,
-			// so that the text of the file is tokenized and indexed, but not stored.
+			// Add the contents of the file to a field named "contents". Specify
+			// a Reader,
+			// so that the text of the file is tokenized and indexed, but not
+			// stored.
 			// Note that FileReader expects the file to be in UTF-8 encoding.
-			// If that's not the case searching for special characters will fail.
+			// If that's not the case searching for special characters will
+			// fail.
 			doc.add(new TextField("contents", fileContent, Field.Store.NO));
-			 
-			
-			
+
 			// EXTRACT THE STRING BETWEEN THE <TITLE> ELEMENT
-			String titleContent = fileContent.substring(fileContent.indexOf("<title>") + 7, fileContent.indexOf("</title>"));
+			try{
+			String titleContent = fileContent.substring(fileContent.indexOf("<title>") + 7,
+					fileContent.indexOf("</title>"));
 			System.out.println(titleContent);
 			doc.add(new TextField("titleContent", titleContent, Field.Store.NO));
-			
-			
+			}catch(IndexOutOfBoundsException e){
+				System.out.println("No Title Found");
+			}
+
 			/*
 			 * BEGIN <VIDEO></VIDEO> ELEMENT EXTRACTION
 			 */
@@ -184,58 +195,64 @@ public class Indexer {
 			String videoContent = null;
 			// Start by making this easier to work with
 
-			// try {
-			String vidSubstring = fileContent.substring(fileContent.indexOf("<video>") + 7,
-					fileContent.indexOf("</video>"));
-			// } catch (Exception e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
+			try {
+				String vidSubstring = fileContent.substring(fileContent.indexOf("<video>") + 7,
+						fileContent.indexOf("</video>"));
+				System.err.println(" FOUND VIDEO");
+				ArrayList<String> vidTags = new ArrayList<String>();
 
-			ArrayList<String> vidTags = new ArrayList<String>();
-			
-			// parse content between <video> elements
-			if (vidSubstring.contains("title=\"")) { // video has title
-				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("title=\""),
-						vidSubstring.indexOf("\"", vidSubstring.indexOf("title=\""))));
-			}
-			if (vidSubstring.contains("lang=\"")) {// video specifies language
-				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("lang=\""),
-						vidSubstring.indexOf("\"", vidSubstring.indexOf("lang=\""))));
-			}
-			if (vidSubstring.contains("alt=\"")) {// video has alternate
-												// description
-				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("alt=\""),
-						vidSubstring.indexOf("\"", vidSubstring.indexOf("alt=\""))));
-			}
-			if (vidSubstring.contains("src=\"")) {// video url, search for strings
-				vidTags.add(vidSubstring.substring(vidSubstring.indexOf("src=\""),
-						vidSubstring.indexOf("\"", vidSubstring.indexOf("src=\""))));
-			}
-			
-			for (String s : vidTags) {
-				videoContent = videoContent+s+ " ";
-			}
+				// parse content between <video> elements
+				if (vidSubstring.contains("title=\"")) { // video has title
+					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("title=\""),
+							vidSubstring.indexOf("\"", vidSubstring.indexOf("title=\""))));
+				}
+				if (vidSubstring.contains("lang=\"")) {// video specifies
+														// language
+					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("lang=\""),
+							vidSubstring.indexOf("\"", vidSubstring.indexOf("lang=\""))));
+				}
+				if (vidSubstring.contains("alt=\"")) {// video has alternate
+														// description
+					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("alt=\""),
+							vidSubstring.indexOf("\"", vidSubstring.indexOf("alt=\""))));
+				}
+				if (vidSubstring.contains("src=\"")) {// video url, search for
+														// strings
+					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("src=\""),
+							vidSubstring.indexOf("\"", vidSubstring.indexOf("src=\""))));
 
-			
-			
-			if (videoContent != null) {
-				System.out.println("VideoContent: " + videoContent);
-				doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
+					// src https://url.com/folder/deconstruction/goesHere.mp4
 
+					// try and look at separating words further if possible.
+					// else sort other side
+				}
+
+				for (String s : vidTags) {
+					videoContent = videoContent + s + " ";
+				}
+
+				if (videoContent != null) {
+					System.out.println("VideoContent: " + videoContent);
+					doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
+
+				}
+			} catch (IndexOutOfBoundsException e){
+				System.out.println("File does not contain video");
 			}
-
 			/*
 			 * END OF <VIDEO></VIDEO> ELEMENT EXTRACTION
 			 */
-			
+
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
-				// New index, so we just add the document (no old document can be there):
+				// New index, so we just add the document (no old document can
+				// be there):
 				System.out.println("adding " + file);
 				writer.addDocument(doc);
 			} else {
-				// Existing index (an old copy of this document may have been indexed) so 
-				// we use updateDocument instead to replace the old one matching the exact 
+				// Existing index (an old copy of this document may have been
+				// indexed) so
+				// we use updateDocument instead to replace the old one matching
+				// the exact
 				// path, if present:
 				System.out.println("updating " + file);
 				writer.updateDocument(new Term("path", file.toString()), doc);
