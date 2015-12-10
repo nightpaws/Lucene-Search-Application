@@ -3,6 +3,7 @@ package model;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -283,7 +284,7 @@ public class SearchModel extends Observable implements ISearchModel {
 
 
 		String index = "test_index";
-		String field = "titleContent";
+		String field = "bodyContent";
 
 		String queries = null;
 		int repeat = 0;
@@ -324,8 +325,10 @@ public class SearchModel extends Observable implements ISearchModel {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
-			Query query = parser.parse(line);
+			
+			line = line+"*";
+			//Query query = parser.parse(line);
+			Query query = new WildcardQuery(new Term(field, line));
 			System.out.println("Searching for: " + query.toString(field));
 
 			if (repeat > 0) {                           // repeat & time as benchmark

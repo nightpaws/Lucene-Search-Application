@@ -13,6 +13,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.jsoup.Jsoup;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -152,6 +153,8 @@ public class Indexer {
 				fileContent = fileContent + " " + sCurrentLine;
 			}
 			br.close();
+			
+			//System.out.println(Jsoup.parse(fileContent).text());
 
 			// Add the path of the file as a field named "path". Use a
 			// field that is indexed (i.e. searchable), but don't tokenize
@@ -171,28 +174,25 @@ public class Indexer {
 			// February 17, 2011, 2-3 PM.
 			doc.add(new LongField("modified", lastModified, Field.Store.NO));
 
-			// Add the contents of the file to a field named "contents". Specify
-			// a Reader,
-			// so that the text of the file is tokenized and indexed, but not
-			// stored.
-			// Note that FileReader expects the file to be in UTF-8 encoding.
-			// If that's not the case searching for special characters will
-			// fail.
-			doc.add(new TextField("contents", fileContent, Field.Store.NO));
+			// ADD <BODY> OF DOCUMENT TO FIELD bodyContent (Uses JSoup).
+			org.jsoup.nodes.Document htmldoc = Jsoup.parse(fileContent);
+			String bodyContent = htmldoc.body().text();
+			System.out.println("bodyContent: " + bodyContent);
+			doc.add(new TextField("bodyContent", bodyContent, Field.Store.NO));
 
-			// EXTRACT THE STRING BETWEEN THE <TITLE> ELEMENT
+			/*// EXTRACT THE STRING BETWEEN THE <TITLE> ELEMENT
 			try {
 				String titleContent = fileContent.substring(fileContent.indexOf("<title>") + 7,
 						fileContent.indexOf("</title>"));
-				System.out.println(titleContent);
+				//System.out.println(titleContent);
 				doc.add(new TextField("titleContent", titleContent, Field.Store.NO));
 			} catch (IndexOutOfBoundsException e) {
-				System.out.println("No Title Found"); // debug line
-			}
+				//System.out.println("No Title Found"); // debug line
+			}*/
 
 			/*
 			 * BEGIN <VIDEO></VIDEO> ELEMENT EXTRACTION
-			 */
+			 
 
 			String videoContent = null;
 			Pattern src = Pattern.compile("src\\s*=\\s*\"(.+?)\"");
@@ -200,7 +200,7 @@ public class Indexer {
 			// Start by making this easier to work with
 
 			try {
-				String vidSubstring = fileContent.substring(fileContent.indexOf("<video>") + 7,
+				String vidSubstring = fileContent.substring(fileContent.indexOf("<video") + 6,
 						fileContent.indexOf("</video>"));
 				ArrayList<String> vidTags = new ArrayList<String>();
 
@@ -248,14 +248,14 @@ public class Indexer {
 			} catch (IndexOutOfBoundsException e) {
 				System.out.println("File does not contain video"); // debug line
 			}
-			/*
+			
 			 * END OF <VIDEO></VIDEO> ELEMENT EXTRACTION
 			 */
 
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
 				// New index, so we just add the document (no old document can
 				// be there):
-				System.out.println("adding " + file);
+				//System.out.println("adding " + file);
 				writer.addDocument(doc);
 			} else {
 				// Existing index (an old copy of this document may have been
@@ -263,7 +263,7 @@ public class Indexer {
 				// we use updateDocument instead to replace the old one matching
 				// the exact
 				// path, if present:
-				System.out.println("updating " + file);
+				//System.out.println("updating " + file);
 				writer.updateDocument(new Term("path", file.toString()), doc);
 			}
 		}
