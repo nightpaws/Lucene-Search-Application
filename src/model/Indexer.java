@@ -195,8 +195,8 @@ public class Indexer {
 			 */
 
 			String videoContent = null;
-			Pattern src = Pattern.compile("src=\"(.*)\"");
-			
+			Pattern src = Pattern.compile("src\\s*=\\s*\"(.+?)\"");
+//			src\s*=\s*"(.+?)"
 			// Start by making this easier to work with
 
 			try {
