@@ -43,7 +43,6 @@ public class SearchController<ActionEvent> implements EventHandler {
 				System.out.println("searchType: 4");
 				model.videoSearch(searchTerm);
 			}
-			model.imageSearch(searchTerm);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

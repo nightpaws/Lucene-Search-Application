@@ -280,7 +280,7 @@ public class SearchModel extends Observable implements ISearchModel {
 		 * Currently a clone of title search
 		 */
 		String index = "test_index";
-		String field = "titleContent";
+		String field = "videoContent";
 		String queries = null;
 		int repeat = 0;
 		boolean raw = false;
@@ -316,7 +316,9 @@ public class SearchModel extends Observable implements ISearchModel {
 				e.printStackTrace();
 			}
 
-			Query query = parser.parse(line);
+			line = "*"+line+"*";
+			//Query query = parser.parse(line);
+			Query query = new WildcardQuery(new Term(field, line));
 			System.out.println("Searching for: " + query.toString(field));
 
 			if (repeat > 0) {                           // repeat & time as benchmark

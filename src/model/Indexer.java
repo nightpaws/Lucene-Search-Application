@@ -15,6 +15,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
@@ -31,6 +32,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -221,6 +223,23 @@ public class Indexer {
 			}
 						
 			doc.add(new TextField("imageContent", imageContent, Field.Store.NO));
+			
+			
+			//Video
+			Elements videos = htmldoc.getElementsByTag("video");
+			String videoContent = "";
+			
+			for (Element el : videos) {
+				Elements childNodes = el.children();
+				videoContent += el.attr("title") + " " + el.attr("alt") + " " +el.attr("lang") + " " +el.attr("src");
+
+				for(Element e:childNodes){
+					videoContent += e.attr("title") + " " + e.attr("alt") + " " +e.attr("lang") + " " +e.attr("src");
+
+				}
+			}
+				System.err.println("videoContent: " + videoContent);		
+			doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
 
 			/*// EXTRACT THE STRING BETWEEN THE <TITLE> ELEMENT
 			try {
