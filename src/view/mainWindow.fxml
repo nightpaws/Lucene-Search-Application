@@ -14,9 +14,10 @@
                <children>
                   <TextField fx:id="txtSearchTerm" layoutX="294.0" layoutY="282.0" prefHeight="35.0" prefWidth="337.0" />
                   <Button fx:id="btnSearch" layoutX="402.0" layoutY="385.0" mnemonicParsing="false" prefHeight="23.0" prefWidth="116.0" text="Search" />
-                  <RadioButton layoutX="338.0" layoutY="339.0" mnemonicParsing="false" text="Titles" />
-                  <RadioButton layoutX="423.0" layoutY="340.0" mnemonicParsing="false" text="Content" />
-                  <RadioButton layoutX="527.0" layoutY="338.0" mnemonicParsing="false" text="Images" />
+                  <RadioButton fx:id="radTitle" layoutX="338.0" layoutY="339.0" mnemonicParsing="false" text="Titles" />
+                  <RadioButton fx:id="radBody" layoutX="423.0" layoutY="340.0" mnemonicParsing="false" text="Content" />
+                  <RadioButton fx:id="radImage" layoutX="527.0" layoutY="338.0" mnemonicParsing="false" text="Images" />
+                  <RadioButton fx:id="radVideo" layoutX="627.0" layoutY="338.0" mnemonicParsing="false" text="Videos" />
                   <Label layoutX="202.0" layoutY="283.0" prefHeight="34.0" prefWidth="86.0" text="Enter Search:" />
                   <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="339.0" layoutY="191.0" pickOnBounds="true" preserveRatio="true">
                      <image>

@@ -14,11 +14,14 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -40,7 +43,7 @@ public class Indexer {
 				+ "in INDEX_PATH that can be searched with SearchFiles";
 		String indexPath = "test_index/"; // update in search model too
 		// String docsPath = "test_pages/";
-		String docsPath = "test_pages_full/";
+		String docsPath = "test_pages/";
 		boolean create = true;
 
 		if (docsPath == null) {
@@ -99,6 +102,32 @@ public class Indexer {
 			System.out.println(" caught a " + e.getClass() + "\n with message: " + e.getMessage());
 		}
 	}
+	
+	public static void extractImage() throws IOException {
+	    // EXTRACT IMAGE CONTENT
+		String websiteURL = "www.example.com/index.html";
+
+		org.jsoup.nodes.Document docu = Jsoup.connect(websiteURL).get();
+		
+		Elements image = docu.getElementsByTag("img");
+	    
+		for (Element element : image) {
+			String src = element.absUrl("src");
+			if(src != null) {
+			System.out.println("Image Found!");
+			System.out.println("src attribute is : "+src);
+			} 
+			else {
+				System.out.println("No Image Located!");
+			    System.out.println("Cannot print src attribute");
+			}
+			
+		}	
+		}
+	public static void getImages(String url) {
+		
+		
+	}
 
 	/**
 	 * Indexes the given file using the given writer, or if a directory is
@@ -138,6 +167,8 @@ public class Indexer {
 			indexDoc(writer, path, Files.getLastModifiedTime(path).toMillis());
 		}
 	}
+	
+	
 
 	/** Indexes a single document */
 	static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException {
@@ -179,6 +210,17 @@ public class Indexer {
 			String bodyContent = htmldoc.body().text();
 			System.out.println("bodyContent: " + bodyContent);
 			doc.add(new TextField("bodyContent", bodyContent, Field.Store.NO));
+			
+			
+			// Images
+			Elements images = htmldoc.getElementsByTag("img");
+			String imageContent = "";
+			
+			for (Element el : images) {
+				imageContent += el.attr("src") + " " + el.attr("alt");
+			}
+						
+			doc.add(new TextField("imageContent", imageContent, Field.Store.NO));
 
 			/*// EXTRACT THE STRING BETWEEN THE <TITLE> ELEMENT
 			try {
@@ -191,6 +233,7 @@ public class Indexer {
 			}*/
 
 			/*
+			 * 
 			 * BEGIN <VIDEO></VIDEO> ELEMENT EXTRACTION
 			 
 

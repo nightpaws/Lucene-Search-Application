@@ -210,8 +210,67 @@ public class SearchModel extends Observable implements ISearchModel {
 	}
 
 	@Override
-	public void imageSearch(String searchTerm) {
-		// TODO Auto-generated method stub
+	public void imageSearch(String searchTerm) throws IOException, ParseException {
+		
+		// 
+		String index = "test_index";
+		String field = "imageContent";
+		String queries = null;
+		int repeat = 0;
+		boolean raw = false;
+		String queryString = null;
+		int hitsPerPage = 10;
+
+		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
+		IndexSearcher searcher = new IndexSearcher(reader);
+		Analyzer analyzer = new StandardAnalyzer();
+
+		queryString = searchTerm;
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+		QueryParser parser = new QueryParser(field, analyzer);
+
+		while (true) {
+			if (queries == null && queryString == null) {                        // prompt the user
+				System.out.println("Enter query: ");
+			}
+
+			String line = queryString != null ? queryString : in.readLine();
+
+			if (line == null || line.length() == -1) {
+				break;
+			}
+
+			line = line.trim();
+			try {
+				if (line.length() == 0) {
+					break;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			line = "*"+line+"*";
+			//Query query = parser.parse(line);
+			Query query = new WildcardQuery(new Term(field, line));
+			System.out.println("Searching for: " + query.toString(field));
+
+			if (repeat > 0) {                           // repeat & time as benchmark
+				Date start = new Date();
+				for (int i = 0; i < repeat; i++) {
+					searcher.search(query, 100);
+				}
+				Date end = new Date();
+				System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
+			}
+
+			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+
+			if (queryString != null) {
+				break;
+			}
+		}
+		reader.close();
 
 	}
 
@@ -278,13 +337,84 @@ public class SearchModel extends Observable implements ISearchModel {
 		reader.close();
 
 	}
+	
+	@Override
+	public void bodySearch(String searchTerm) throws IOException, ParseException {
+		String index = "test_index";
+		String field = "bodyContent";
+
+		String queries = null;
+		int repeat = 0;
+		boolean raw = false;
+		String queryString = null;
+		int hitsPerPage = 10;
+
+		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
+		IndexSearcher searcher = new IndexSearcher(reader);
+		Analyzer analyzer = new StandardAnalyzer();
+
+		queryString = searchTerm;
+
+		BufferedReader in = null;
+		if (queries != null) {
+			in = Files.newBufferedReader(Paths.get(queries), StandardCharsets.UTF_8);
+		} else {
+			in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+		}
+		QueryParser parser = new QueryParser(field, analyzer);
+		while (true) {
+			if (queries == null && queryString == null) {                        // prompt the user
+				System.out.println("Enter query: ");
+			}
+
+			String line = queryString != null ? queryString : in.readLine();
+
+			if (line == null || line.length() == -1) {
+				break;
+			}
+
+			line = line.trim();
+			try {
+				if (line.length() == 0) {
+					break;
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			line = line+"*";
+			//Query query = parser.parse(line);
+			Query query = new WildcardQuery(new Term(field, line));
+			System.out.println("Searching for: " + query.toString(field));
+
+			if (repeat > 0) {                           // repeat & time as benchmark
+				Date start = new Date();
+				for (int i = 0; i < repeat; i++) {
+					searcher.search(query, 100);
+				}
+				Date end = new Date();
+				System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
+			}
+
+			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+
+			if (queryString != null) {
+				break;
+			}
+		}
+		reader.close();
+		setChanged();
+		notifyObservers();
+		
+	}
 
 	@Override
 	public void titleSearch(String searchTerm) throws IOException, ParseException {
 
 
 		String index = "test_index";
-		String field = "bodyContent";
+		String field = "titleContent";
 
 		String queries = null;
 		int repeat = 0;
@@ -398,5 +528,7 @@ public class SearchModel extends Observable implements ISearchModel {
 	public void addObservers(Observer o) {
 		super.addObserver(o);	
 	}
+
+
 
 }

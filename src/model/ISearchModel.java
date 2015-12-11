@@ -14,14 +14,17 @@ public interface ISearchModel  {
 	public void contentSearch(String searchTerm) throws ParserException;
 	
 	// Searches img tags
-	public void imageSearch(String searchTerm);
+	public void imageSearch(String searchTerm) throws IOException, ParseException;
 	
 	// Can implement later if there's time.
 	public void videoSearch(String searchTerm) throws IOException, ParseException;
 	
 	// Searches Title tags.
 	public void titleSearch(String searchTerm) throws IOException, ParseException;
-
+	
+	// Search Body Tags
+	public void bodySearch(String searchTerm) throws IOException, ParseException;
+	
 	// Initialise the model
 	public void initialise();
 	
