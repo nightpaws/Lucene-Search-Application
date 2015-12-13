@@ -1,6 +1,8 @@
 package model;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +23,8 @@ import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.xml.*;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 import org.w3c.dom.Element;
 
 import java.io.BufferedReader;
@@ -52,7 +56,7 @@ public class SearchModel extends Observable implements ISearchModel {
 	List<String> stopWords;
 
 	// Search Results
-	List<Map<String, String>> searchResults;
+	List<Map<String, List<String>>> searchResults;
 
 	IndexReader reader; // Object for reading the index directory.
 	IndexSearcher searcher; // Searcher Object
@@ -66,7 +70,7 @@ public class SearchModel extends Observable implements ISearchModel {
 
 		index = "test_index/"; //update in indexer
 
-		searchResults = new ArrayList<Map<String, String>>();
+		searchResults = new ArrayList<Map<String, List<String>>>();
 
 		/*stopWords = new ArrayList<String>();
 		reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
@@ -83,120 +87,11 @@ public class SearchModel extends Observable implements ISearchModel {
 	public void initialise() {
 		Indexer indexer = new Indexer(index);
 	}
-	/**
-	 * This demonstrates a typical paging search scenario, where the search engine presents 
-	 * pages of size n to the user. The user can then go to the next page if interested in
-	 * the next hits.
-	 * 
-	 * When the query is executed for the first time, then only enough results are collected
-	 * to fill 5 result pages. If the user wants to page beyond this limit, then the query
-	 * is executed another time and all hits are collected.
-	 * 
-	 */
-	public void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
-			int hitsPerPage, boolean raw, boolean interactive) throws IOException {
 
-		// Collect enough docs to show 5 pages
-		TopDocs results = searcher.search(query, 5 * hitsPerPage);
-		ScoreDoc[] hits = results.scoreDocs;
-
-
-		int numTotalHits = results.totalHits;
-		System.out.println(numTotalHits + " total matching documents");
-
-		int start = 0;
-		int end = Math.min(numTotalHits, hitsPerPage);
-		for (int i = start; i < end; i++) {
-			Document doc = searcher.doc(hits[i].doc);
-			String path = doc.get("path");
-			if (path != null) {
-				Map<String, String> resultMap = new HashMap<String, String>();
-				resultMap.put("Path", path);
-				//resultMap.put("Modified", doc.get("modified").toString());
-				searchResults.add(resultMap);
-			}
-		}
-		while (true) {
-			if (end > hits.length) {
-				System.out.println("Only results 1 - " + hits.length +" of " + numTotalHits + " total matching documents collected.");
-				System.out.println("Collect more (y/n) ?");
-				String line = in.readLine();
-				if (line.length() == 0 || line.charAt(0) == 'n') {
-					break;
-				}
-
-				hits = searcher.search(query, numTotalHits).scoreDocs;
-			}
-
-			end = Math.min(hits.length, start + hitsPerPage);
-
-			for (int i = start; i < end; i++) {
-				if (raw) {                              // output raw format
-					System.out.println("doc="+hits[i].doc+" score="+hits[i].score);
-					continue;
-				}
-
-				Document doc = searcher.doc(hits[i].doc);
-				String path = doc.get("path");
-				if (path != null) {
-					System.out.println((i+1) + ". " + path);
-					String title = doc.get("title");
-					if (title != null) {
-						System.out.println("   Title: " + doc.get("title"));
-					}
-				} else {
-					System.out.println((i+1) + ". " + "No path for this document");
-				}
-
-			}
-
-			if (!interactive || end == 0) {
-				break;
-			}
-
-			if (numTotalHits >= end) {
-				boolean quit = false;
-				while (true) {
-					System.out.print("Press ");
-					if (start - hitsPerPage >= 0) {
-						System.out.print("(p)revious page, ");  
-					}
-					if (start + hitsPerPage < numTotalHits) {
-						System.out.print("(n)ext page, ");
-					}
-					System.out.println("(q)uit or enter number to jump to a page.");
-
-					String line = in.readLine();
-					if (line.length() == 0 || line.charAt(0)=='q') {
-						quit = true;
-						break;
-					}
-					if (line.charAt(0) == 'p') {
-						start = Math.max(0, start - hitsPerPage);
-						break;
-					} else if (line.charAt(0) == 'n') {
-						if (start + hitsPerPage < numTotalHits) {
-							start+=hitsPerPage;
-						}
-						break;
-					} else {
-						int page = Integer.parseInt(line);
-						if ((page - 1) * hitsPerPage < numTotalHits) {
-							start = (page - 1) * hitsPerPage;
-							break;
-						} else {
-							System.out.println("No such page");
-						}
-					}
-				}
-				if (quit) break;
-				end = Math.min(numTotalHits, start + hitsPerPage);
-			}
-		}
-	}
 
 	@Override
 	public void contentSearch(String searchTerm) {
+		clearSearch();
 		// TODO Auto-generated method stub
 		QueryBuilder coreParser = new CoreParser(searchTerm, analyzer);
 		Element element = new IIOMetadataNode("title");
@@ -211,7 +106,7 @@ public class SearchModel extends Observable implements ISearchModel {
 
 	@Override
 	public void imageSearch(String searchTerm) throws IOException, ParseException {
-		
+		clearSearch();
 		// 
 		String index = "test_index";
 		String field = "imageContent";
@@ -240,7 +135,7 @@ public class SearchModel extends Observable implements ISearchModel {
 			if (line == null || line.length() == -1) {
 				break;
 			}
-
+			
 			line = line.trim();
 			try {
 				if (line.length() == 0) {
@@ -250,9 +145,9 @@ public class SearchModel extends Observable implements ISearchModel {
 				e.printStackTrace();
 			}
 
-			line = "*"+line+"*";
+			String newLine = "*"+line+"*";
 			//Query query = parser.parse(line);
-			Query query = new WildcardQuery(new Term(field, line));
+			Query query = new WildcardQuery(new Term(field, newLine));
 			System.out.println("Searching for: " + query.toString(field));
 
 			if (repeat > 0) {                           // repeat & time as benchmark
@@ -263,19 +158,68 @@ public class SearchModel extends Observable implements ISearchModel {
 				Date end = new Date();
 				System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
 			}
-
+			
+			// Search the pages..
 			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+			
+			// Get Images from Page..
+			getImagesFromSearch(line);
 
+			
 			if (queryString != null) {
 				break;
 			}
 		}
 		reader.close();
+		setChanged();
+		notifyObservers();
 
+	}
+
+	private void getImagesFromSearch(String line) throws IOException {
+		
+		System.out.println("Image Search Term: " + line);
+		for (Map<String, List<String>> m : searchResults) {
+			String file = m.get("Path").get(0);
+			List<String> imageSources = new ArrayList<String>();
+			
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			org.jsoup.nodes.Document htmldoc;
+			try {
+				StringBuilder sb = new StringBuilder();
+				String fileLine = br.readLine();
+				
+				while (fileLine != null) {
+				    sb.append(fileLine);
+				    sb.append(" ");
+				    fileLine = br.readLine();
+				}
+				htmldoc = Jsoup.parse(sb.toString());
+			} finally {
+				br.close();
+			}
+			
+			// Get the img elements
+			Elements images = htmldoc.getElementsByTag("img");
+			
+			// Get All the img elements in this document that match the search term
+			for (org.jsoup.nodes.Element el : images) {
+				if (el.attr("src").contains(line)) {
+					imageSources.add(el.attr("src"));
+				} else if (el.attr("alt").contains(line)) {
+					imageSources.add(el.attr("src"));
+				}
+			}
+			
+			m.put("imageSources", imageSources);
+		}
+		
+		
 	}
 
 	@Override
 	public void videoSearch(String searchTerm) throws IOException, ParseException {
+		clearSearch();
 		/**
 		 * Currently a clone of title search
 		 */
@@ -329,9 +273,10 @@ public class SearchModel extends Observable implements ISearchModel {
 				Date end = new Date();
 				System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
 			}
-
+			
+			// Do the Search..
 			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
-
+			
 			if (queryString != null) {
 				break;
 			}
@@ -342,6 +287,7 @@ public class SearchModel extends Observable implements ISearchModel {
 	
 	@Override
 	public void bodySearch(String searchTerm) throws IOException, ParseException {
+		clearSearch();
 		String index = "test_index";
 		String field = "bodyContent";
 
@@ -413,7 +359,7 @@ public class SearchModel extends Observable implements ISearchModel {
 
 	@Override
 	public void titleSearch(String searchTerm) throws IOException, ParseException {
-
+		clearSearch();
 
 		String index = "test_index";
 		String field = "titleContent";
@@ -521,8 +467,7 @@ public class SearchModel extends Observable implements ISearchModel {
 	}
 
 	@Override
-	public List<Map<String, String>> getSearchResults() {
-
+	public List<Map<String, List<String>>> getSearchResults() {
 		return searchResults;
 	}
 
@@ -530,7 +475,123 @@ public class SearchModel extends Observable implements ISearchModel {
 	public void addObservers(Observer o) {
 		super.addObserver(o);	
 	}
+	
+	private void clearSearch() {
+		searchResults.clear();
+	}
+	
+	/**
+	 * This demonstrates a typical paging search scenario, where the search engine presents 
+	 * pages of size n to the user. The user can then go to the next page if interested in
+	 * the next hits.
+	 * 
+	 * When the query is executed for the first time, then only enough results are collected
+	 * to fill 5 result pages. If the user wants to page beyond this limit, then the query
+	 * is executed another time and all hits are collected.
+	 * 
+	 */
+	private void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
+			int hitsPerPage, boolean raw, boolean interactive) throws IOException {
 
+		// Collect enough docs to show 5 pages
+		TopDocs results = searcher.search(query, 5 * hitsPerPage);
+		ScoreDoc[] hits = results.scoreDocs;
+
+
+		int numTotalHits = results.totalHits;
+		System.out.println(numTotalHits + " total matching documents");
+
+		int start = 0;
+		int end = Math.min(numTotalHits, hitsPerPage);
+		for (int i = start; i < end; i++) {
+			Document doc = searcher.doc(hits[i].doc);
+			String path = doc.get("path");
+			if (path != null) {
+				Map<String, List<String>> resultMap = new HashMap<String, List<String>>();
+				resultMap.put("Path", new ArrayList<String>());
+				resultMap.get("Path").add(path);
+				//resultMap.put("Modified", doc.get("modified").toString());
+				searchResults.add(resultMap);
+			}
+		}
+		while (true) {
+			if (end > hits.length) {
+				System.out.println("Only results 1 - " + hits.length +" of " + numTotalHits + " total matching documents collected.");
+				System.out.println("Collect more (y/n) ?");
+				String line = in.readLine();
+				if (line.length() == 0 || line.charAt(0) == 'n') {
+					break;
+				}
+
+				hits = searcher.search(query, numTotalHits).scoreDocs;
+			}
+
+			end = Math.min(hits.length, start + hitsPerPage);
+
+			for (int i = start; i < end; i++) {
+				if (raw) {                              // output raw format
+					System.out.println("doc="+hits[i].doc+" score="+hits[i].score);
+					continue;
+				}
+
+				Document doc = searcher.doc(hits[i].doc);
+				String path = doc.get("path");
+				if (path != null) {
+					System.out.println((i+1) + ". " + path);
+					String title = doc.get("title");
+					if (title != null) {
+						System.out.println("   Title: " + doc.get("title"));
+					}
+				} else {
+					System.out.println((i+1) + ". " + "No path for this document");
+				}
+
+			}
+
+			if (!interactive || end == 0) {
+				break;
+			}
+
+			if (numTotalHits >= end) {
+				boolean quit = false;
+				while (true) {
+					System.out.print("Press ");
+					if (start - hitsPerPage >= 0) {
+						System.out.print("(p)revious page, ");  
+					}
+					if (start + hitsPerPage < numTotalHits) {
+						System.out.print("(n)ext page, ");
+					}
+					System.out.println("(q)uit or enter number to jump to a page.");
+
+					String line = in.readLine();
+					if (line.length() == 0 || line.charAt(0)=='q') {
+						quit = true;
+						break;
+					}
+					if (line.charAt(0) == 'p') {
+						start = Math.max(0, start - hitsPerPage);
+						break;
+					} else if (line.charAt(0) == 'n') {
+						if (start + hitsPerPage < numTotalHits) {
+							start+=hitsPerPage;
+						}
+						break;
+					} else {
+						int page = Integer.parseInt(line);
+						if ((page - 1) * hitsPerPage < numTotalHits) {
+							start = (page - 1) * hitsPerPage;
+							break;
+						} else {
+							System.out.println("No such page");
+						}
+					}
+				}
+				if (quit) break;
+				end = Math.min(numTotalHits, start + hitsPerPage);
+			}
+		}
+	}
 
 
 }

@@ -1,41 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.web.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.StackPane?>
 
-<TabPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.MainWindowLogic">
+<TabPane prefHeight="728.0" prefWidth="1322.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.MainWindowLogic">
    <tabs>
       <Tab fx:id="tabSearch" closable="false" text="Search">
          <content>
-            <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="707.0" prefWidth="860.0">
+            <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="697.0" prefWidth="1320.0">
                <children>
-                  <TextField fx:id="txtSearchTerm" layoutX="294.0" layoutY="282.0" prefHeight="35.0" prefWidth="337.0" />
-                  <Button fx:id="btnSearch" layoutX="402.0" layoutY="385.0" mnemonicParsing="false" prefHeight="23.0" prefWidth="116.0" text="Search" />
-                  <RadioButton fx:id="radTitle" layoutX="338.0" layoutY="339.0" mnemonicParsing="false" text="Titles" />
-                  <RadioButton fx:id="radBody" layoutX="423.0" layoutY="340.0" mnemonicParsing="false" text="Content" />
-                  <RadioButton fx:id="radImage" layoutX="527.0" layoutY="338.0" mnemonicParsing="false" text="Images" />
-                  <RadioButton fx:id="radVideo" layoutX="627.0" layoutY="338.0" mnemonicParsing="false" text="Videos" />
-                  <Label layoutX="202.0" layoutY="283.0" prefHeight="34.0" prefWidth="86.0" text="Enter Search:" />
-                  <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="339.0" layoutY="191.0" pickOnBounds="true" preserveRatio="true">
+                  <TextField fx:id="txtSearchTerm" layoutX="516.0" layoutY="274.0" prefHeight="35.0" prefWidth="337.0" />
+                  <Button fx:id="btnSearch" layoutX="624.0" layoutY="377.0" mnemonicParsing="false" prefHeight="23.0" prefWidth="116.0" text="Search" />
+                  <RadioButton fx:id="radTitle" layoutX="508.0" layoutY="327.0" mnemonicParsing="false" text="Titles" />
+                  <RadioButton fx:id="radBody" layoutX="593.0" layoutY="328.0" mnemonicParsing="false" text="Content" />
+                  <RadioButton fx:id="radImage" layoutX="697.0" layoutY="326.0" mnemonicParsing="false" text="Images" />
+                  <RadioButton fx:id="radVideo" layoutX="797.0" layoutY="326.0" mnemonicParsing="false" text="Videos" />
+                  <Label layoutX="424.0" layoutY="275.0" prefHeight="34.0" prefWidth="86.0" text="Enter Search:" />
+                  <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="582.0" layoutY="182.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../../Resources/frontlogo.png" />
                      </image>
                   </ImageView>
-                  <Button fx:id="btnInitialise" layoutX="404.0" layoutY="476.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Initialise" />
+                  <Button fx:id="btnInitialise" layoutX="623.0" layoutY="441.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="118.0" text="Initialise" />
                </children>
             </Pane>
          </content>
       </Tab>
-      <Tab fx:id="tabResults" closable="false" text="Results">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+      <Tab closable="false" text="Results">
+         <content>
+            <FlowPane prefHeight="695.0" prefWidth="1315.0">
                <children>
-                  <TextArea fx:id="txtResultsDisplay" layoutX="161.0" layoutY="41.0" prefHeight="707.0" prefWidth="860.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-               </children></AnchorPane>
-        </content>
+                  <ScrollPane prefHeight="268.0" prefWidth="1321.0">
+                     <content>
+                     	<TextArea fx:id="txtResultsDisplay" prefHeight="269.0" prefWidth="1319.0">
+                  	
+                  		</TextArea>
+                     </content>
+                  </ScrollPane>
+                  <ScrollPane prefHeight="427.0" prefWidth="1325.0">
+                     <content> 
+                     	<GridPane fx:id="gridPane">
+
+						</GridPane>
+                     </content>
+                  </ScrollPane>
+               </children>
+            </FlowPane>
+         </content>
       </Tab>
    </tabs>
 </TabPane>

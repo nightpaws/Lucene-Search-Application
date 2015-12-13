@@ -238,7 +238,7 @@ public class Indexer {
 
 				}
 			}
-				System.err.println("videoContent: " + videoContent);		
+			System.err.println("videoContent: " + videoContent);		
 			doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
 
 			/*// EXTRACT THE STRING BETWEEN THE <TITLE> ELEMENT

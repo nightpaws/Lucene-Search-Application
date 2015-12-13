@@ -28,7 +28,7 @@ public interface ISearchModel  {
 	// Initialise the model
 	public void initialise();
 	
-	public List<Map<String, String>> getSearchResults();
+	public List<Map<String, List<String>>> getSearchResults();
 	
 	public void addObservers(Observer o);
 	
