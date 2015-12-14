@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.StackPane?>
 
-<TabPane prefHeight="728.0" prefWidth="1322.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.MainWindowLogic">
+<TabPane fx:id="tabPane" prefHeight="728.0" prefWidth="1322.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.MainWindowLogic">
    <tabs>
       <Tab fx:id="tabSearch" closable="false" text="Search">
          <content>
@@ -31,7 +31,7 @@
             </Pane>
          </content>
       </Tab>
-      <Tab closable="false" text="Results">
+      <Tab fx:id="tabResults" closable="false" text="Results">
          <content>
             <FlowPane prefHeight="695.0" prefWidth="1315.0">
                <children>

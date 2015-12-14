@@ -31,6 +31,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -66,8 +68,6 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	private ImageView imgView;
 	
 	@FXML
-	private ToggleGroup radBtnGroup;
-	@FXML
 	private RadioButton radImage;
 	@FXML
 	private RadioButton radVideo;
@@ -78,9 +78,11 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	@FXML
 	private RadioButton radGeneral;
 	@FXML
-	private TabPane tabResults;
+	private TabPane tabPane;
 	@FXML
 	private GridPane gridPane;
+	@FXML
+	private Tab tabResults;
 	
 	ISearchModel model;
 	EventHandler<ActionEvent> sc;
@@ -102,7 +104,8 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 		txtResultsDisplay = new TextArea();
 		txtResultsDisplay.setEditable(false);
 		
-		tabResults = new TabPane();
+		tabPane = new TabPane();
+		tabResults = new Tab();
 		gridPane = new GridPane();
 		
 		radImage = new RadioButton();
@@ -200,6 +203,8 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 				}
 			}
 		}
+		SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+		selectionModel.select(tabResults);
 	}
 
 	@Override

@@ -54,6 +54,9 @@ public class SearchModel extends Observable implements ISearchModel {
 
 	// A List of stopWords.
 	List<String> stopWords;
+	
+	// The index to be searched
+	String index;
 
 	// Search Results
 	List<Map<String, List<String>>> searchResults;
@@ -64,11 +67,10 @@ public class SearchModel extends Observable implements ISearchModel {
 
 	QueryBuilder coreParser;
 
-	String index;
 
 	public SearchModel() throws IOException {
 
-		index = "test_index/"; //update in indexer
+		index = "test_index";
 
 		searchResults = new ArrayList<Map<String, List<String>>>();
 
@@ -90,25 +92,8 @@ public class SearchModel extends Observable implements ISearchModel {
 
 
 	@Override
-	public void contentSearch(String searchTerm) {
-		clearSearch();
-		// TODO Auto-generated method stub
-		QueryBuilder coreParser = new CoreParser(searchTerm, analyzer);
-		Element element = new IIOMetadataNode("title");
-		try {
-			coreParser.getQuery(element);
-		} catch (ParserException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	@Override
 	public void imageSearch(String searchTerm) throws IOException, ParseException {
 		clearSearch();
-		// 
-		String index = "test_index";
 		String field = "imageContent";
 		String queries = null;
 		int repeat = 0;
@@ -199,15 +184,21 @@ public class SearchModel extends Observable implements ISearchModel {
 				br.close();
 			}
 			
+			
+			List<String> savedImageSource = new ArrayList<String>();
 			// Get the img elements
 			Elements images = htmldoc.getElementsByTag("img");
 			
 			// Get All the img elements in this document that match the search term
 			for (org.jsoup.nodes.Element el : images) {
 				if (el.attr("src").contains(line)) {
-					imageSources.add(el.attr("src"));
+					if (imageSources.contains(el.attr("src")) == false) {
+						imageSources.add(el.attr("src"));
+					}
 				} else if (el.attr("alt").contains(line)) {
-					imageSources.add(el.attr("src"));
+					if (imageSources.contains(el.attr("src")) == false) {
+						imageSources.add(el.attr("src"));
+					}
 				}
 			}
 			
@@ -223,7 +214,6 @@ public class SearchModel extends Observable implements ISearchModel {
 		/**
 		 * Currently a clone of title search
 		 */
-		String index = "test_index";
 		String field = "videoContent";
 		String queries = null;
 		int repeat = 0;
@@ -288,7 +278,6 @@ public class SearchModel extends Observable implements ISearchModel {
 	@Override
 	public void bodySearch(String searchTerm) throws IOException, ParseException {
 		clearSearch();
-		String index = "test_index";
 		String field = "bodyContent";
 
 		String queries = null;
@@ -360,8 +349,6 @@ public class SearchModel extends Observable implements ISearchModel {
 	@Override
 	public void titleSearch(String searchTerm) throws IOException, ParseException {
 		clearSearch();
-
-		String index = "test_index";
 		String field = "titleContent";
 
 		String queries = null;
