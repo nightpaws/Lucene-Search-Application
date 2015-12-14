@@ -25,11 +25,16 @@ public interface ISearchModel  {
 	// Search Body Tags
 	public void bodySearch(String searchTerm) throws IOException, ParseException;
 	
+	// General Search: Meta (Keywords, Description), Body, Title
+	public void generalSearch(String searchTerm) throws IOException, ParseException;
+	
 	// Initialise the model
 	public void initialise();
 	
 	public List<Map<String, List<String>>> getSearchResults();
 	
 	public void addObservers(Observer o);
+
+	
 	
 }

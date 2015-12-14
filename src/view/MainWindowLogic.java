@@ -61,8 +61,6 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	@FXML
 	private TextField txtSearchTerm;
 	@FXML
-	private TableView<Result> resultsTable;
-	@FXML
 	private TextArea txtResultsDisplay;
 	@FXML
 	private ImageView imgView;
@@ -77,6 +75,8 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	private RadioButton radTitle;
 	@FXML
 	private RadioButton radBody;
+	@FXML
+	private RadioButton radGeneral;
 	@FXML
 	private TabPane tabResults;
 	@FXML
@@ -99,24 +99,17 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 		rbc = new RadioButtonController(this);
 		
 		txtSearchTerm = new TextField();
-		resultsTable = new TableView<Result>();
 		txtResultsDisplay = new TextArea();
+		txtResultsDisplay.setEditable(false);
 		
 		tabResults = new TabPane();
-		
-		radBtnGroup = new ToggleGroup();
-		
 		gridPane = new GridPane();
 		
-		
 		radImage = new RadioButton();
-		radImage.setToggleGroup(radBtnGroup);
 		radVideo = new RadioButton();
-		radVideo.setToggleGroup(radBtnGroup);
 		radTitle = new RadioButton();
-		radTitle.setToggleGroup(radBtnGroup);
 		radBody = new RadioButton();
-		radBody.setToggleGroup(radBtnGroup);
+		radGeneral = new RadioButton();
 		radBody.setSelected(true);
 		
 	}
@@ -131,6 +124,7 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
         radImage.setOnAction(rbc);
         radTitle.setOnAction(rbc);
         radVideo.setOnAction(rbc);
+        radGeneral.setOnAction(rbc);
          
 	}
 
@@ -138,7 +132,8 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 	public void update(Observable o, Object arg) {
 		
 		String newLine = System.getProperty("line.separator");
-	
+		
+		txtResultsDisplay.clear(); // Clear the Results textbox
 		gridPane.getChildren().clear(); // Clear the Grid of images		
 		txtSearchTerm.clear(); // Clear the search box
 		
@@ -234,9 +229,10 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 			return "radTitle";
 		} else if (radVideo.isSelected()) {
 			return "radVideo";
+		} else if (radGeneral.isSelected()) {
+			return "radGeneral";
 		}
 		return "null";
-		
 	}
 
 	@Override
@@ -246,26 +242,36 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 				radTitle.setSelected(false);
 				radBody.setSelected(false);
 				radVideo.setSelected(false);
+				radGeneral.setSelected(false);
 				radImage.setSelected(true);
 				break;
 			case "radTitle":
 				radVideo.setSelected(false);
 				radBody.setSelected(false);
 				radImage.setSelected(false);
+				radGeneral.setSelected(false);
 				radTitle.setSelected(true);
 				break;
 			case "radBody":
 				radTitle.setSelected(false);
 				radVideo.setSelected(false);
 				radImage.setSelected(false);
+				radGeneral.setSelected(false);
 				radBody.setSelected(true);
 				break;
 			case "radVideo":
 				radTitle.setSelected(false);
 				radBody.setSelected(false);
 				radImage.setSelected(false);
+				radGeneral.setSelected(false);
 				radVideo.setSelected(true);
 				break;
+			case "radGeneral":
+				radTitle.setSelected(false);
+				radBody.setSelected(false);
+				radImage.setSelected(false);
+				radVideo.setSelected(false);
+				radGeneral.setSelected(true);
 		}
 		
 	}

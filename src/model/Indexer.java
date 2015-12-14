@@ -187,132 +187,73 @@ public class Indexer {
 			}
 			br.close();
 			
-			//System.out.println(Jsoup.parse(fileContent).text());
-
-			// Add the path of the file as a field named "path". Use a
-			// field that is indexed (i.e. searchable), but don't tokenize
-			// the field into separate words and don't index term frequency
-			// or positional information:
+			// Jsoup Document object holding the html document
+			org.jsoup.nodes.Document htmldoc = Jsoup.parse(fileContent);
+			
+			// Add the path of the file to the pathField
 			Field pathField = new StringField("path", file.toString(), Field.Store.YES);
 			doc.add(pathField);
 
-			// Add the last modified date of the file a field named "modified".
-			// Use a LongField that is indexed (i.e. efficiently filterable with
-			// NumericRangeFilter). This indexes to milli-second resolution,
-			// which
-			// is often too fine. You could instead create a number based on
-			// year/month/day/hour/minutes/seconds, down the resolution you
-			// require.
-			// For example the long value 2011021714 would mean
-			// February 17, 2011, 2-3 PM.
+			// Add last-modified date to 'modified' field
 			doc.add(new LongField("modified", lastModified, Field.Store.NO));
 
 			// ADD <BODY> OF DOCUMENT TO FIELD bodyContent (Uses JSoup).
-			org.jsoup.nodes.Document htmldoc = Jsoup.parse(fileContent);
 			String bodyContent = htmldoc.body().text();
-			System.out.println("bodyContent: " + bodyContent);
 			doc.add(new TextField("bodyContent", bodyContent, Field.Store.NO));
 			
 			
-			// Images
+			// Add content of image elements to imageContent field
 			Elements images = htmldoc.getElementsByTag("img");
 			String imageContent = "";
-			
 			for (Element el : images) {
 				imageContent += el.attr("src") + " " + el.attr("alt");
-			}
-						
+			}			
 			doc.add(new TextField("imageContent", imageContent, Field.Store.NO));
 			
 			
-			//Video
+			// Add content of video elements to videoContent field
 			Elements videos = htmldoc.getElementsByTag("video");
 			String videoContent = "";
-			
 			for (Element el : videos) {
 				Elements childNodes = el.children();
 				videoContent += el.attr("title") + " " + el.attr("alt") + " " +el.attr("lang") + " " +el.attr("src");
-
 				for(Element e:childNodes){
 					videoContent += e.attr("title") + " " + e.attr("alt") + " " +e.attr("lang") + " " +e.attr("src");
-
 				}
 			}
-			System.err.println("videoContent: " + videoContent);		
 			doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
-
-			/*// EXTRACT THE STRING BETWEEN THE <TITLE> ELEMENT
-			try {
-				String titleContent = fileContent.substring(fileContent.indexOf("<title>") + 7,
-						fileContent.indexOf("</title>"));
-				//System.out.println(titleContent);
-				doc.add(new TextField("titleContent", titleContent, Field.Store.NO));
-			} catch (IndexOutOfBoundsException e) {
-				//System.out.println("No Title Found"); // debug line
-			}*/
-
-			/*
-			 * 
-			 * BEGIN <VIDEO></VIDEO> ELEMENT EXTRACTION
-			 
-
-			String videoContent = null;
-			Pattern src = Pattern.compile("src\\s*=\\s*\"(.+?)\"");
-//			src\s*=\s*"(.+?)"
-			// Start by making this easier to work with
-
-			try {
-				String vidSubstring = fileContent.substring(fileContent.indexOf("<video") + 6,
-						fileContent.indexOf("</video>"));
-				ArrayList<String> vidTags = new ArrayList<String>();
-
-				// parse content between <video> elements
-				if (vidSubstring.contains("title=")) { // video has title
-					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("title=\""),
-							vidSubstring.indexOf("\"", vidSubstring.indexOf("title=\""))));
-				}
-				if (vidSubstring.contains("lang=")) {// video specifies
-														// language
-					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("lang=\""),
-							vidSubstring.indexOf("\"", vidSubstring.indexOf("lang=\""))));
-				}
-				if (vidSubstring.contains("alt=")) {// video has alternate
-														// description
-					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("alt=\""),
-							vidSubstring.indexOf("\"", vidSubstring.indexOf("alt=\""))));
-				}
-				if (vidSubstring.contains("src=")) {// video url, search for
-														// strings
-//					vidTags.add(vidSubstring.substring(vidSubstring.indexOf("src=\""),
-//							vidSubstring.indexOf("\"", vidSubstring.indexOf("src=\""))));
-				
-					//attempting to get the content from the space between src=" and "
-					Matcher m = src.matcher(vidSubstring);
-					while (m.find()) {
-					  System.err.println(m.group(1));
-					}
-					
-					// src https://url.com/folder/deconstruction/goesHere.mp4
-
-					// try and look at separating words further if possible.
-					// else sort other side
-				}
-
-				for (String s : vidTags) {
-					videoContent = videoContent + s + " ";
-				}
-
-				if (videoContent != null) {
-					System.out.println("VideoContent: " + videoContent);
-					doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
-
-				}
-			} catch (IndexOutOfBoundsException e) {
-				System.out.println("File does not contain video"); // debug line
-			}
 			
-			 * END OF <VIDEO></VIDEO> ELEMENT EXTRACTION
-			 */
+			// Add content of title element to titleContent field
+			Elements titles = htmldoc.getElementsByTag("title");
+			String titleContent = "";
+			if (titles != null) {
+				for (Element el : titles) {
+					titleContent += el.text();
+				}
+			}
+			doc.add(new TextField("titleContent", titleContent, Field.Store.NO));
+
+			// Add body, title and keywords meta-tag content to generalContent field
+			Elements metaTags = htmldoc.getElementsByTag("meta");
+			String keywordContent = "";
+			String descriptionContent = "";
+			
+			for (Element el : metaTags) {
+				if (el.attr("name").equals("keywords")) {
+					keywordContent += el.attr("content");
+				} else if (el.attr("name").equals("description")) {
+					descriptionContent += el.attr("description");
+				}
+				
+				Elements childNodes = el.children();
+				videoContent += el.attr("title") + " " + el.attr("alt") + " " +el.attr("lang") + " " +el.attr("src");
+				for(Element e:childNodes){
+					videoContent += e.attr("title") + " " + e.attr("alt") + " " +e.attr("lang") + " " +e.attr("src");
+				}
+			}
+			String generalContent = bodyContent + keywordContent + descriptionContent;
+			doc.add(new TextField("generalContent", generalContent, Field.Store.NO));
+
 
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
 				// New index, so we just add the document (no old document can

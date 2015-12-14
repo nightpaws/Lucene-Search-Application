@@ -33,6 +33,9 @@ public class RadioButtonController implements EventHandler{
 			case "radVideo":
 				view.setUnselected(clickedButton);
 				break;
+			case "radGeneral":
+				view.setUnselected(clickedButton);
+				break;
 		}
 		
 	}

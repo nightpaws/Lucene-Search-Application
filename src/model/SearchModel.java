@@ -428,43 +428,81 @@ public class SearchModel extends Observable implements ISearchModel {
 		setChanged();
 		notifyObservers();
 	}
+	
+	@Override
+	public void generalSearch(String searchTerm) throws IOException, ParseException {
+		System.out.println("SEARCHING");
+		clearSearch();
 
+		String index = "test_index";
+		String field = "generalContent";
 
-	private void removeStopwords(String searchTerm) { // note: code adapted from http://stackoverflow.com/questions/27685839/removing-stopwords-from-a-string-in-java
-		int k=0;
-		ArrayList<String> wordsList = new ArrayList<String>();
-		String currentLine;
-		String[] stopwords = new String[175];
+		String queries = null;
+		int repeat = 0;
+		boolean raw = false;
+		String queryString = null;
+		int hitsPerPage = 10;
 
-		//adds words from text file to array
-		try{
-			FileReader fr=new FileReader("stopwords.txt");
-			BufferedReader br= new BufferedReader(fr);
-			while ((currentLine = br.readLine()) != null){
-				stopwords[k]=currentLine;
-				k++;
+		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
+		IndexSearcher searcher = new IndexSearcher(reader);
+		Analyzer analyzer = new StandardAnalyzer();
+
+		queryString = searchTerm;
+
+		BufferedReader in = null;
+		if (queries != null) {
+			in = Files.newBufferedReader(Paths.get(queries), StandardCharsets.UTF_8);
+		} else {
+			in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+		}
+		QueryParser parser = new QueryParser(field, analyzer);
+		while (true) {
+			if (queries == null && queryString == null) {                        // prompt the user
+				System.out.println("Enter query: ");
 			}
-			String s= searchTerm;
-			StringBuilder builder = new StringBuilder(s);
-			String[] words = builder.toString().split("\\s"); // words in searchterm
-			for (String word : words){
-				wordsList.add(word);
+
+			String line = queryString != null ? queryString : in.readLine();
+
+			if (line == null || line.length() == -1) {
+				break;
 			}
-			for(int i = 0; i < wordsList.size(); i++){
-				for(int j = 0; j < k; j++){
-					if(stopwords[j].contains(wordsList.get(i).toLowerCase())){
-						wordsList.set(i, "");
-						break;
-					}
+
+			line = line.trim();
+			try {
+				if (line.length() == 0) {
+					break;
 				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			line = line+"*";
+			//Query query = parser.parse(line);
+			Query query = new WildcardQuery(new Term(field, line));
+			System.out.println("Searching for: " + query.toString(field));
+
+			if (repeat > 0) {                           // repeat & time as benchmark
+				Date start = new Date();
+				for (int i = 0; i < repeat; i++) {
+					searcher.search(query, 100);
+				}
+				Date end = new Date();
+				System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
+			}
+
+			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+
+			if (queryString != null) {
+				break;
 			}
 		}
-
-		catch(Exception e){
-			System.out.println(e);
-		}
-
+		reader.close();
+		setChanged();
+		notifyObservers();
+		
 	}
+
 
 	@Override
 	public List<Map<String, List<String>>> getSearchResults() {
@@ -592,6 +630,7 @@ public class SearchModel extends Observable implements ISearchModel {
 			}
 		}
 	}
+
 
 
 }

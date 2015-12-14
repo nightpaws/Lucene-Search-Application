@@ -15,10 +15,11 @@
                <children>
                   <TextField fx:id="txtSearchTerm" layoutX="516.0" layoutY="274.0" prefHeight="35.0" prefWidth="337.0" />
                   <Button fx:id="btnSearch" layoutX="624.0" layoutY="377.0" mnemonicParsing="false" prefHeight="23.0" prefWidth="116.0" text="Search" />
-                  <RadioButton fx:id="radTitle" layoutX="508.0" layoutY="327.0" mnemonicParsing="false" text="Titles" />
-                  <RadioButton fx:id="radBody" layoutX="593.0" layoutY="328.0" mnemonicParsing="false" text="Content" />
-                  <RadioButton fx:id="radImage" layoutX="697.0" layoutY="326.0" mnemonicParsing="false" text="Images" />
-                  <RadioButton fx:id="radVideo" layoutX="797.0" layoutY="326.0" mnemonicParsing="false" text="Videos" />
+                  <RadioButton fx:id="radTitle" layoutX="458.0" layoutY="328.0" mnemonicParsing="false" text="Titles" />
+                  <RadioButton fx:id="radBody" layoutX="532.0" layoutY="328.0" mnemonicParsing="false" text="Content" />
+                  <RadioButton fx:id="radImage" layoutX="626.0" layoutY="326.0" mnemonicParsing="false" text="Images" />
+                  <RadioButton fx:id="radVideo" layoutX="708.0" layoutY="326.0" mnemonicParsing="false" text="Videos" />
+                  <RadioButton fx:id="radGeneral" layoutX="789.0" layoutY="326.0" mnemonicParsing="false" text="General" />
                   <Label layoutX="424.0" layoutY="275.0" prefHeight="34.0" prefWidth="86.0" text="Enter Search:" />
                   <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="582.0" layoutY="182.0" pickOnBounds="true" preserveRatio="true">
                      <image>
