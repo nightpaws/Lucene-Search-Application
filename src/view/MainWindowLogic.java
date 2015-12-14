@@ -190,7 +190,26 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 					        	columnIndex = 0;
 					        	rowIndex++;
 					        }
-				        } catch (Exception e) {
+				        }catch(IllegalArgumentException e){
+				        	Image img = null;
+				        	img = new Image("/notFound.png");
+				        	ImageView imgView = new ImageView(img);
+					        imgView.setFitWidth(175);
+					        imgView.setPreserveRatio(true);
+					        imgView.setSmooth(true);
+					        imgView.setCache(true);
+					        System.out.println("columnIndex: " + columnIndex);
+					        System.out.println("rowIndex: " + rowIndex);
+
+					        gridPane.add(imgView, columnIndex, rowIndex);
+				        
+					        columnIndex++;
+					        if (columnIndex == 6) {
+					        	columnIndex = 0;
+					        	rowIndex++;
+					        }
+				        }
+				        catch (Exception e) {
 				        	e.printStackTrace();
 				        }
 					}
