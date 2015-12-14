@@ -45,7 +45,7 @@ public class Indexer {
 				+ "in INDEX_PATH that can be searched with SearchFiles";
 		String indexPath = "test_index/"; // update in search model too
 		// String docsPath = "test_pages/";
-		String docsPath = "test_pages/";
+		String docsPath = "test_pages_full/";
 		boolean create = true;
 
 		if (docsPath == null) {

@@ -21,7 +21,7 @@
                   <RadioButton fx:id="radVideo" layoutX="708.0" layoutY="326.0" mnemonicParsing="false" text="Videos" />
                   <RadioButton fx:id="radGeneral" layoutX="789.0" layoutY="326.0" mnemonicParsing="false" text="General" />
                   <Label layoutX="424.0" layoutY="275.0" prefHeight="34.0" prefWidth="86.0" text="Enter Search:" />
-                  <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="582.0" layoutY="182.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="70.0" fitWidth="335.0" layoutX="526.0" layoutY="181.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../../Resources/frontlogo.png" />
                      </image>
