@@ -104,31 +104,30 @@ public class Indexer {
 			System.out.println(" caught a " + e.getClass() + "\n with message: " + e.getMessage());
 		}
 	}
-	
+
 	public static void extractImage() throws IOException {
-	    // EXTRACT IMAGE CONTENT
+		// EXTRACT IMAGE CONTENT
 		String websiteURL = "www.example.com/index.html";
 
 		org.jsoup.nodes.Document docu = Jsoup.connect(websiteURL).get();
-		
+
 		Elements image = docu.getElementsByTag("img");
-	    
+
 		for (Element element : image) {
 			String src = element.absUrl("src");
-			if(src != null) {
-			System.out.println("Image Found!");
-			System.out.println("src attribute is : "+src);
-			} 
-			else {
+			if (src != null) {
+				System.out.println("Image Found!");
+				System.out.println("src attribute is : " + src);
+			} else {
 				System.out.println("No Image Located!");
-			    System.out.println("Cannot print src attribute");
+				System.out.println("Cannot print src attribute");
 			}
-			
-		}	
+
 		}
+	}
+
 	public static void getImages(String url) {
-		
-		
+
 	}
 
 	/**
@@ -169,8 +168,6 @@ public class Indexer {
 			indexDoc(writer, path, Files.getLastModifiedTime(path).toMillis());
 		}
 	}
-	
-	
 
 	/** Indexes a single document */
 	static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException {
@@ -186,10 +183,10 @@ public class Indexer {
 				fileContent = fileContent + " " + sCurrentLine;
 			}
 			br.close();
-			
+
 			// Jsoup Document object holding the html document
 			org.jsoup.nodes.Document htmldoc = Jsoup.parse(fileContent);
-			
+
 			// Add the path of the file to the pathField
 			Field pathField = new StringField("path", file.toString(), Field.Store.YES);
 			doc.add(pathField);
@@ -200,65 +197,74 @@ public class Indexer {
 			// ADD <BODY> OF DOCUMENT TO FIELD bodyContent (Uses JSoup).
 			String bodyContent = htmldoc.body().text();
 			doc.add(new TextField("bodyContent", bodyContent, Field.Store.NO));
-			
-			
+
 			// Add content of image elements to imageContent field
 			Elements images = htmldoc.getElementsByTag("img");
 			String imageContent = "";
 			for (Element el : images) {
 				imageContent += el.attr("src") + " " + el.attr("alt");
-			}			
-			doc.add(new TextField("imageContent", imageContent, Field.Store.NO));
-			
-			
-			// Add content of video elements to videoContent field
-			Elements videos = htmldoc.getElementsByTag("video");
-			String videoContent = "";
-			for (Element el : videos) {
-				Elements childNodes = el.children();
-				videoContent += el.attr("title") + " " + el.attr("alt") + " " +el.attr("lang") + " " +el.attr("src");
-				for(Element e:childNodes){
-					videoContent += e.attr("title") + " " + e.attr("alt") + " " +e.attr("lang") + " " +e.attr("src");
-				}
 			}
-			doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
-			
+			doc.add(new TextField("imageContent", imageContent, Field.Store.NO));
+
 			// Add content of title element to titleContent field
 			Elements titles = htmldoc.getElementsByTag("title");
 			String titleContent = "";
+			String titlePass = null;
 			if (titles != null) {
 				for (Element el : titles) {
 					titleContent += el.text();
 				}
 			}
+			if (titleContent.toLowerCase().contains("youtube") || (titleContent.toLowerCase().contains("vimeo")
+					|| titleContent.toLowerCase().contains("dailymotion"))) {
+				titlePass = titleContent;
+			}
+
 			doc.add(new TextField("titleContent", titleContent, Field.Store.NO));
 
-			// Add body, title and keywords meta-tag content to generalContent field
+			// Add content of video elements to videoContent field
+			Elements videos = htmldoc.getElementsByTag("video");
+			String videoContent;
+			if (titlePass != null)
+				videoContent = titlePass;
+			else
+				videoContent = "";
+
+			for (Element el : videos) {
+				Elements childNodes = el.children();
+				videoContent += el.attr("title") + " " + el.attr("alt") + " " + el.attr("lang") + " " + el.attr("src");
+				for (Element e : childNodes) {
+					videoContent += e.attr("title") + " " + e.attr("alt") + " " + e.attr("lang") + " " + e.attr("src");
+				}
+			}
+			doc.add(new TextField("videoContent", videoContent, Field.Store.NO));
+
+			// Add body, title and keywords meta-tag content to generalContent
+			// field
 			Elements metaTags = htmldoc.getElementsByTag("meta");
 			String keywordContent = "";
 			String descriptionContent = "";
-			
+
 			for (Element el : metaTags) {
 				if (el.attr("name").equals("keywords")) {
 					keywordContent += el.attr("content");
 				} else if (el.attr("name").equals("description")) {
 					descriptionContent += el.attr("description");
 				}
-				
+
 				Elements childNodes = el.children();
-				videoContent += el.attr("title") + " " + el.attr("alt") + " " +el.attr("lang") + " " +el.attr("src");
-				for(Element e:childNodes){
-					videoContent += e.attr("title") + " " + e.attr("alt") + " " +e.attr("lang") + " " +e.attr("src");
+				videoContent += el.attr("title") + " " + el.attr("alt") + " " + el.attr("lang") + " " + el.attr("src");
+				for (Element e : childNodes) {
+					videoContent += e.attr("title") + " " + e.attr("alt") + " " + e.attr("lang") + " " + e.attr("src");
 				}
 			}
 			String generalContent = bodyContent + keywordContent + descriptionContent;
 			doc.add(new TextField("generalContent", generalContent, Field.Store.NO));
 
-
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
 				// New index, so we just add the document (no old document can
 				// be there):
-				//System.out.println("adding " + file);
+				// System.out.println("adding " + file);
 				writer.addDocument(doc);
 			} else {
 				// Existing index (an old copy of this document may have been
@@ -266,7 +272,7 @@ public class Indexer {
 				// we use updateDocument instead to replace the old one matching
 				// the exact
 				// path, if present:
-				//System.out.println("updating " + file);
+				// System.out.println("updating " + file);
 				writer.updateDocument(new Term("path", file.toString()), doc);
 			}
 		}
