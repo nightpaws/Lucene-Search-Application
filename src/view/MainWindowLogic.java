@@ -192,7 +192,7 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 					        }
 				        }catch(IllegalArgumentException e){
 				        	Image img = null;
-				        	img = new Image("/notFound.png");
+				        	//img = new Image("notFound.png");
 				        	ImageView imgView = new ImageView(img);
 					        imgView.setFitWidth(175);
 					        imgView.setPreserveRatio(true);

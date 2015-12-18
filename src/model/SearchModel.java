@@ -57,6 +57,8 @@ public class SearchModel extends Observable implements ISearchModel {
 	
 	// The index to be searched
 	String index;
+	
+	// Stopwords to be used in the
 
 	// Search Results
 	List<Map<String, List<String>>> searchResults;
@@ -103,32 +105,31 @@ public class SearchModel extends Observable implements ISearchModel {
 
 		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
 		IndexSearcher searcher = new IndexSearcher(reader);
-		Analyzer analyzer = new StandardAnalyzer();
+		Analyzer analyzer = new StandardAnalyzer(new BufferedReader(new FileReader("./Resources/stop-word-list.txt")));
 
 		String line = searchTerm;
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 		QueryParser parser = new QueryParser(field, analyzer);
 
-		line = line.trim();
-
-		String newLine = "*"+line+"*";
-		Query query = new WildcardQuery(new Term(field, newLine));
 		
-		/*if (repeat > 0) {                           // repeat & time as benchmark
-			Date start = new Date();
-			for (int i = 0; i < repeat; i++) {
-				searcher.search(query, 100);
-			}
-			Date end = new Date();
-			System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
-		}*/
+		System.out.println("Line: " + line);
+		line = removeStopwords(line);
+		System.out.println("Line: " + line);
+		line = line.trim();
+		
+		if (line.length() > 0){
+			String newLine = "*"+line+"*";
+			Query query = new WildcardQuery(new Term(field, newLine));
 			
-		// Search the pages..
-		doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
-			
-		// Get Images from Page..
-		getImagesFromSearch(line);
+				
+			// Search the pages..
+			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+				
+			// Get Images from Page..
+			getImagesFromSearch(line);
+		}
+		
 		
 		reader.close();
 		setChanged();
@@ -196,54 +197,25 @@ public class SearchModel extends Observable implements ISearchModel {
 
 		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
 		IndexSearcher searcher = new IndexSearcher(reader);
-		Analyzer analyzer = new StandardAnalyzer();
+		Analyzer analyzer = new StandardAnalyzer(new BufferedReader(new FileReader("./Resources/stop-word-list.txt")));
 
-		queryString = searchTerm;
+		String line = searchTerm;
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 		QueryParser parser = new QueryParser(field, analyzer);
 
-		while (true) {
-			if (queries == null && queryString == null) {                        // prompt the user
-				System.out.println("Enter query: ");
-			}
-
-			String line = queryString != null ? queryString : in.readLine();
-
-			if (line == null || line.length() == -1) {
-				break;
-			}
-
-			line = line.trim();
-			try {
-				if (line.length() == 0) {
-					break;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			line = "*"+line+"*";
-			//Query query = parser.parse(line);
+		System.out.println("Line: " + line);
+		line = removeStopwords(line);
+		System.out.println("Line: " + line);
+		line = line.trim();
+		if (line.length() > 0){
 			Query query = new WildcardQuery(new Term(field, line));
 			System.out.println("Searching for: " + query.toString(field));
-
-			if (repeat > 0) {                           // repeat & time as benchmark
-				Date start = new Date();
-				for (int i = 0; i < repeat; i++) {
-					searcher.search(query, 100);
-				}
-				Date end = new Date();
-				System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
-			}
 			
 			// Do the Search..
 			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
-			
-			if (queryString != null) {
-				break;
-			}
 		}
+		
 		reader.close();
 		setChanged();
 		notifyObservers();
@@ -262,57 +234,27 @@ public class SearchModel extends Observable implements ISearchModel {
 
 		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
 		IndexSearcher searcher = new IndexSearcher(reader);
-		Analyzer analyzer = new StandardAnalyzer();
+		Analyzer analyzer = new StandardAnalyzer(new BufferedReader(new FileReader("./Resources/stop-word-list.txt")));
 
-		queryString = searchTerm;
+		String line = searchTerm;
 
-		BufferedReader in = null;
-		if (queries != null) {
-			in = Files.newBufferedReader(Paths.get(queries), StandardCharsets.UTF_8);
-		} else {
-			in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
-		}
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 		QueryParser parser = new QueryParser(field, analyzer);
-		while (true) {
-			if (queries == null && queryString == null) {                        // prompt the user
-				System.out.println("Enter query: ");
-			}
-
-			String line = queryString != null ? queryString : in.readLine();
-
-			if (line == null || line.length() == -1) {
-				break;
-			}
-
-			line = line.trim();
-			try {
-				if (line.length() == 0) {
-					break;
-				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			line = line+"*";
-			//Query query = parser.parse(line);
-			Query query = new WildcardQuery(new Term(field, line));
-
-			if (repeat > 0) {                           // repeat & time as benchmark
-				Date start = new Date();
-				for (int i = 0; i < repeat; i++) {
-					searcher.search(query, 100);
-				}
-				Date end = new Date();
-				System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
-			}
-
-			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
-
-			if (queryString != null) {
-				break;
+		
+		System.out.println("Line: " + line);
+		line = removeStopwords(line);
+		System.out.println("Line: " + line);
+		line = line.trim();
+		if (line.length() > 0){
+			Query query = parser.parse(line);
+	
+			if (doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null) == false){
+				String newLine = line+"*";
+				Query newQuery = new WildcardQuery(new Term(field, newLine));
+				doPagingSearch(in, searcher, newQuery, hitsPerPage, raw, queries == null && queryString == null);
 			}
 		}
+		
 		reader.close();
 		setChanged();
 		notifyObservers();
@@ -331,56 +273,24 @@ public class SearchModel extends Observable implements ISearchModel {
 
 		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
 		IndexSearcher searcher = new IndexSearcher(reader);
-		Analyzer analyzer = new StandardAnalyzer();
+		Analyzer analyzer = new StandardAnalyzer(new BufferedReader(new FileReader("./Resources/stop-word-list.txt")));
 
-		queryString = searchTerm;
-
-		BufferedReader in = null;
-		if (queries != null) {
-			in = Files.newBufferedReader(Paths.get(queries), StandardCharsets.UTF_8);
-		} else {
-			in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
-		}
+		String line = searchTerm;
+		
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 		QueryParser parser = new QueryParser(field, analyzer);
-		while (true) {
-			if (queries == null && queryString == null) {                        // prompt the user
-				System.out.println("Enter query: ");
-			}
-
-			String line = queryString != null ? queryString : in.readLine();
-
-			if (line == null || line.length() == -1) {
-				break;
-			}
-
-			line = line.trim();
-			try {
-				if (line.length() == 0) {
-					break;
-				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+		
+		System.out.println("Line: " + line);
+		line = removeStopwords(line);
+		System.out.println("Line: " + line);
+		line = line.trim();
+		if (line.length() > 0){
 			line = line+"*";
-			//Query query = parser.parse(line);
 			Query query = new WildcardQuery(new Term(field, line));
-
-			if (repeat > 0) {                           // repeat & time as benchmark
-				Date start = new Date();
-				for (int i = 0; i < repeat; i++) {
-					searcher.search(query, 100);
-				}
-				Date end = new Date();
-			}
-
+			
 			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
-
-			if (queryString != null) {
-				break;
-			}
 		}
+
 		reader.close();
 		setChanged();
 		notifyObservers();
@@ -399,57 +309,25 @@ public class SearchModel extends Observable implements ISearchModel {
 
 		IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
 		IndexSearcher searcher = new IndexSearcher(reader);
-		Analyzer analyzer = new StandardAnalyzer();
+		Analyzer analyzer = new StandardAnalyzer(new BufferedReader(new FileReader("./Resources/stop-word-list.txt")));
 
-		queryString = searchTerm;
-
-		BufferedReader in = null;
-		if (queries != null) {
-			in = Files.newBufferedReader(Paths.get(queries), StandardCharsets.UTF_8);
-		} else {
-			in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
-		}
+		String line = searchTerm;
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 		QueryParser parser = new QueryParser(field, analyzer);
-		while (true) {
-			if (queries == null && queryString == null) {                        // prompt the user
-				System.out.println("Enter query: ");
-			}
 
-			String line = queryString != null ? queryString : in.readLine();
-
-			if (line == null || line.length() == -1) {
-				break;
-			}
-
-			line = line.trim();
-			try {
-				if (line.length() == 0) {
-					break;
-				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			line = line+"*";
-			//Query query = parser.parse(line);
-			Query query = new WildcardQuery(new Term(field, line));
-
-			if (repeat > 0) {                           // repeat & time as benchmark
-				Date start = new Date();
-				for (int i = 0; i < repeat; i++) {
-					searcher.search(query, 100);
-				}
-				Date end = new Date();
-				System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
-			}
-
-			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
-
-			if (queryString != null) {
-				break;
+		System.out.println("Line: " + line);
+		line = removeStopwords(line);
+		System.out.println("Line: " + line);
+		line = line.trim();
+		if (line.length() > 0){
+			Query query = parser.parse(line);
+			if (doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null) == false) {
+				line = line+"*";
+				Query newQuery = new WildcardQuery(new Term(field, line));
+				doPagingSearch(in, searcher, newQuery, hitsPerPage, raw, queries == null && queryString == null);
 			}
 		}
+				
 		reader.close();
 		setChanged();
 		notifyObservers();
@@ -480,29 +358,85 @@ public class SearchModel extends Observable implements ISearchModel {
 	 * is executed another time and all hits are collected.
 	 * 
 	 */
-	private void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
+	private boolean doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
 			int hitsPerPage, boolean raw, boolean interactive) throws IOException {
-
+		System.out.println("paging");
 		// Collect enough docs to show 5 pages
 		TopDocs results = searcher.search(query, 5 * hitsPerPage);
 		ScoreDoc[] hits = results.scoreDocs;
 
-
 		int numTotalHits = results.totalHits;
-		System.out.println(numTotalHits + " total matching documents");
-
-		int start = 0;
-		int end = numTotalHits;
-		for (int i = start; i < end; i++) {
-			Document doc = searcher.doc(hits[i].doc);
-			String path = doc.get("path");
-			if (path != null) {
-				Map<String, List<String>> resultMap = new HashMap<String, List<String>>();
-				resultMap.put("Path", new ArrayList<String>());
-				resultMap.get("Path").add(path);
-				//resultMap.put("Modified", doc.get("modified").toString());
-				searchResults.add(resultMap);
+		System.out.println("numTotalHits" + numTotalHits);
+		if (numTotalHits == 0) {
+			return false;
+		} else {
+			
+			System.out.println(numTotalHits + " total matching documents");
+	
+			int start = 0;
+			int end = numTotalHits;
+			for (int i = start; i < end; i++) {
+				Document doc = searcher.doc(hits[i].doc);
+				String path = doc.get("path");
+				if (path != null) {
+					Map<String, List<String>> resultMap = new HashMap<String, List<String>>();
+					resultMap.put("Path", new ArrayList<String>());
+					resultMap.get("Path").add(path);
+					//resultMap.put("Modified", doc.get("modified").toString());
+					searchResults.add(resultMap);
+				}
+			}
+			return true;
+		}
+	}
+	
+	private String removeStopwords(String searchTerm) { // note: code adapted from http://stackoverflow.com/questions/27685839/removing-stopwords-from-a-string-in-java
+		
+		int k=0;
+		ArrayList<String> wordsList = new ArrayList<String>();
+		String currentLine;
+		//String[] stopwords = new String[175];
+		ArrayList<String> stopwords = new ArrayList<String>();
+		String newSearchTerm = "";
+		
+		//adds words from text file to array
+		try{
+			
+	        FileReader fr=new FileReader("./Resources/stop-word-list.txt");
+	        BufferedReader br= new BufferedReader(fr);
+	        
+	        while ((currentLine = br.readLine()) != null){
+	            stopwords.add(currentLine);
+	            k++;
+	        }
+	        
+	        String s= searchTerm;
+	        StringBuilder builder = new StringBuilder(s);
+	        String[] words = builder.toString().split("\\s"); // words in searchterm
+	        
+	        for (String word : words){
+	            wordsList.add(word);
+	        }
+	        
+	        System.out.println(wordsList);
+	        for(int i = 0; i < wordsList.size(); i++){
+	            //for(int j = 0; j < k; j++){
+	                if (stopwords.contains(wordsList.get(i).toLowerCase())){
+	                    wordsList.set(i, "");
+	                    break;
+	             //   }
+	             }
+	        }  
+		    
+			for (String t : wordsList) {
+				newSearchTerm += " " + t;
 			}
 		}
+		catch(Exception e){
+		        System.out.println(e);
+		        return searchTerm;
+		    
+		}
+		return newSearchTerm;
 	}
 }

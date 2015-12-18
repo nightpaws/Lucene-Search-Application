@@ -19,6 +19,7 @@ import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -65,7 +66,7 @@ public class Indexer {
 			System.out.println("Indexing to directory '" + indexPath + "'...");
 
 			Directory dir = FSDirectory.open(Paths.get(indexPath));
-			Analyzer analyzer = new StandardAnalyzer();
+			Analyzer analyzer = new StandardAnalyzer(new BufferedReader(new FileReader("./Resources/stop-word-list.txt")));
 			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
 			if (create) {
