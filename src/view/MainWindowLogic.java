@@ -214,7 +214,14 @@ public class MainWindowLogic implements IMainWindowLogic, Observer, Initializabl
 				        }
 					}
 				} else {
-					txtResultsDisplay.appendText(s + " ");
+					
+					
+					txtResultsDisplay.appendText(s + ": ");
+					txtResultsDisplay.setStyle(""
+					        + "-fx-font-size: 30px;"
+					        + "-fx-font-style: italic;"
+					        + "-fx-font-weight: bold;"
+					        + "-fx-font-family: fantasy;");
 					for (String r : result.get(s)) {
 						txtResultsDisplay.appendText(r + " ");
 					}	

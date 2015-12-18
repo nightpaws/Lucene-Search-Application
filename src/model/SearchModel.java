@@ -378,10 +378,13 @@ public class SearchModel extends Observable implements ISearchModel {
 			for (int i = start; i < end; i++) {
 				Document doc = searcher.doc(hits[i].doc);
 				String path = doc.get("path");
+				String date = doc.get("modified");
 				if (path != null) {
 					Map<String, List<String>> resultMap = new HashMap<String, List<String>>();
 					resultMap.put("Path", new ArrayList<String>());
 					resultMap.get("Path").add(path);
+					resultMap.put("Date", new ArrayList<String>());
+					resultMap.get("Date").add(date);
 					//resultMap.put("Modified", doc.get("modified").toString());
 					searchResults.add(resultMap);
 				}

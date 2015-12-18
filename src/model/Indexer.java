@@ -193,7 +193,7 @@ public class Indexer {
 			doc.add(pathField);
 
 			// Add last-modified date to 'modified' field
-			doc.add(new LongField("modified", lastModified, Field.Store.NO));
+			doc.add(new LongField("modified", lastModified, Field.Store.YES));
 
 			// ADD <BODY> OF DOCUMENT TO FIELD bodyContent (Uses JSoup).
 			String bodyContent = htmldoc.body().text();
